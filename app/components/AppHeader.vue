@@ -1,0 +1,47 @@
+<template>
+  <header class="app-header">
+    <div class="rune">☗</div>
+    <div class="titles">
+      <h1>Oracle of the Ancient</h1>
+      <p>Your jargon-free Dota 2 coach — ask anything, no experience required.</p>
+    </div>
+    <div class="rune">☗</div>
+  </header>
+</template>
+
+<style scoped>
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.75rem 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.titles h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  color: var(--color-gold);
+  text-shadow: 0 0 18px rgba(201, 162, 39, 0.35);
+}
+
+.titles p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.rune {
+  color: var(--color-fel-bright);
+  font-size: 1.4rem;
+  text-shadow: 0 0 10px rgba(158, 230, 106, 0.6);
+}
+
+@media (max-width: 480px) {
+  .rune {
+    display: none;
+  }
+}
+</style>
