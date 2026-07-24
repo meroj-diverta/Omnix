@@ -10,8 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "isomorphic-dompurify": "^3.19.0",
+    "marked": "^18.0.7",
     "nuxt": "^4.5.0",
     "vue": "^3.5.40",
     "vue-router": "^5.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
   }
 }
