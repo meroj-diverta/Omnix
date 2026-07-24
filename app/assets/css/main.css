@@ -1,0 +1,61 @@
+:root {
+  --color-void: #0a090f;
+  --color-void-2: #15121c;
+  --color-void-3: #1e1a28;
+  --color-blood: #9c1533;
+  --color-blood-bright: #d43a54;
+  --color-fel: #5c8f3c;
+  --color-fel-bright: #9ee66a;
+  --color-gold: #c9a227;
+  --color-parchment: #e4dccb;
+  --color-text-muted: #a49bb5;
+  --color-border: #33283f;
+
+  --font-display: 'Cinzel', 'Georgia', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__nuxt {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%, rgba(156, 21, 51, 0.25), transparent),
+    radial-gradient(ellipse 70% 50% at 85% 110%, rgba(92, 143, 60, 0.18), transparent),
+    var(--color-void);
+  color: var(--color-parchment);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.03em;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-blood);
+}
