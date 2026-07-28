@@ -5,7 +5,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   app: {
     head: {
-      title: 'Oracle of the Ancient — Dota 2 Companion',
+      title: 'Omnix of the Ancient — Dota 2 Companion',
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
@@ -21,8 +21,8 @@ export default defineNuxtConfig({
     public: {
       kurocoApiBase: process.env.NUXT_PUBLIC_KUROCO_API_BASE || 'https://meroj.g.kuroco.app',
       kurocoApiId: process.env.NUXT_PUBLIC_KUROCO_API_ID || '6',
-      oracleEndpoint: process.env.NUXT_PUBLIC_ORACLE_ENDPOINT || 'chat_contents_search',
-      oracleConfigured: Boolean(process.env.KUROCO_ACCESS_TOKEN)
+      omnixEndpoint: process.env.NUXT_PUBLIC_OMNIX_ENDPOINT || 'chat_contents_search',
+      omnixConfigured: Boolean(process.env.KUROCO_ACCESS_TOKEN)
     }
   }
 })

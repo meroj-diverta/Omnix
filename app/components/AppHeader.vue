@@ -2,7 +2,7 @@
   <header class="app-header">
     <div class="rune">☗</div>
     <div class="titles">
-      <h1>Oracle of the Ancient</h1>
+      <h1>Omnix of the Ancient</h1>
       <p>Your jargon-free Dota 2 coach — ask anything, no experience required.</p>
     </div>
     <div class="rune">☗</div>

@@ -9,9 +9,9 @@
       </div>
     </div>
     <ChatBubble v-for="message in messages" :key="message.id" :message="message" />
-    <div v-if="isLoading" class="bubble-row oracle">
+    <div v-if="isLoading" class="bubble-row omnix">
       <div class="avatar">☗</div>
-      <div class="bubble pending">The Oracle consults the ancient runes...</div>
+      <div class="bubble pending">Omnix consults the ancient runes...</div>
     </div>
   </div>
 </template>

@@ -10,7 +10,7 @@ export interface ChatSource {
 
 export interface ChatMessage {
   id: string
-  role: 'user' | 'oracle'
+  role: 'user' | 'omnix'
   text: string
   images?: ChatImage[]
   sources?: ChatSource[]
@@ -18,7 +18,7 @@ export interface ChatMessage {
   isError?: boolean
 }
 
-export interface OracleResponse {
+export interface OmnixResponse {
   answer: string
   images?: ChatImage[]
   sources?: ChatSource[]

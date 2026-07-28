@@ -4,5 +4,5 @@
 </template>
 
 <script setup lang="ts">
-const { messages, isLoading, ask } = useOracle()
+const { messages, isLoading, ask } = useOmnix()
 </script>

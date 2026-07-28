@@ -2,7 +2,7 @@ interface KurocoChatResponse {
   errors: string[]
   reply: string
   messages: string[]
-  list: { subject: string; slug: string }[]
+  list: { subject: string; slug: string; image?: string }[]
 }
 
 // Kuroco content titles come HTML-entity-encoded (e.g. "Roshan&#x27;s Banner")
@@ -25,7 +25,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const kurocoResponse = await $fetch<KurocoChatResponse>(
-    `${config.public.kurocoApiBase}/rcms-api/${config.public.kurocoApiId}/${config.public.oracleEndpoint}`,
+    `${config.public.kurocoApiBase}/rcms-api/${config.public.kurocoApiId}/${config.public.omnixEndpoint}`,
     {
       method: 'POST',
       headers: { 'X-RCMS-API-ACCESS-TOKEN': config.kurocoAccessToken },
@@ -38,7 +38,10 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    answer: kurocoResponse.reply || kurocoResponse.messages?.[0] || "The Oracle has nothing to say about that.",
-    sources: kurocoResponse.list?.map((item) => ({ subject: decodeEntities(item.subject), slug: item.slug }))
+    answer: kurocoResponse.reply || kurocoResponse.messages?.[0] || "Omnix has nothing to say about that.",
+    sources: kurocoResponse.list?.map((item) => ({ subject: decodeEntities(item.subject), slug: item.slug })),
+    images: kurocoResponse.list
+      ?.filter((item) => item.image)
+      .map((item) => ({ url: item.image as string, alt: decodeEntities(item.subject) }))
   }
 })

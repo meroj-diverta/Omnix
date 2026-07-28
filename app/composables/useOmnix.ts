@@ -1,4 +1,4 @@
-import type { ChatMessage, OracleResponse } from '~/types/chat'
+import type { ChatMessage, OmnixResponse } from '~/types/chat'
 
 const MOCK_ANSWERS = [
   '"BKB" is short for Black King Bar — an item that makes you immune to most magic and disables for a few seconds. Think of it as a panic button for surviving a gank.',
@@ -9,7 +9,7 @@ const MOCK_ANSWERS = [
 ]
 
 let mockId = 0
-function nextMockAnswer(query: string): OracleResponse {
+function nextMockAnswer(query: string): OmnixResponse {
   const answer = MOCK_ANSWERS[mockId % MOCK_ANSWERS.length]
   mockId += 1
   return {
@@ -17,11 +17,11 @@ function nextMockAnswer(query: string): OracleResponse {
   }
 }
 
-export function useOracle() {
+export function useOmnix() {
   const config = useRuntimeConfig()
 
-  const messages = useState<ChatMessage[]>('oracle-messages', () => [])
-  const isLoading = useState('oracle-loading', () => false)
+  const messages = useState<ChatMessage[]>('omnix-messages', () => [])
+  const isLoading = useState('omnix-loading', () => false)
 
   function pushMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>) {
     messages.value.push({
@@ -39,10 +39,10 @@ export function useOracle() {
     isLoading.value = true
 
     try {
-      let response: OracleResponse
+      let response: OmnixResponse
 
-      if (config.public.oracleConfigured) {
-        response = await $fetch<OracleResponse>('/api/oracle', {
+      if (config.public.omnixConfigured) {
+        response = await $fetch<OmnixResponse>('/api/omnix', {
           method: 'POST',
           body: { text: trimmed }
         })
@@ -51,11 +51,11 @@ export function useOracle() {
         response = nextMockAnswer(trimmed)
       }
 
-      pushMessage({ role: 'oracle', text: response.answer, images: response.images, sources: response.sources })
+      pushMessage({ role: 'omnix', text: response.answer, images: response.images, sources: response.sources })
     } catch {
       pushMessage({
-        role: 'oracle',
-        text: 'The Ancients are silent... the connection to the Oracle failed. Try again.',
+        role: 'omnix',
+        text: 'The Ancients are silent... the connection to Omnix failed. Try again.',
         isError: true
       })
     } finally {

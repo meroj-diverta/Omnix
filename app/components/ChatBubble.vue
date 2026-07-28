@@ -1,6 +1,6 @@
 <template>
   <div class="bubble-row" :class="message.role">
-    <div class="avatar" v-if="message.role === 'oracle'">☗</div>
+    <div class="avatar" v-if="message.role === 'omnix'">☗</div>
     <div class="bubble" :class="{ error: message.isError }">
       <p v-if="message.role === 'user'" class="text">{{ message.text }}</p>
       <div v-else class="markdown" v-html="renderedText" />
@@ -64,7 +64,7 @@ const renderedText = computed(() => DOMPurify.sanitize(marked.parse(props.messag
   color: #fff0f0;
 }
 
-.oracle .bubble {
+.omnix .bubble {
   background: var(--color-void-2);
   border: 1px solid var(--color-border);
   border-bottom-left-radius: 0.2rem;
