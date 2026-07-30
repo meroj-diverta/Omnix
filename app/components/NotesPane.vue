@@ -14,6 +14,7 @@
         <button type="submit" :disabled="isChecking">{{ isChecking ? 'Signing in...' : 'Sign in' }}</button>
       </form>
       <p v-if="authError" class="error">{{ authError }}</p>
+      <p class="hint">No account yet? <NuxtLink to="/register">Create one</NuxtLink>.</p>
     </div>
 
     <template v-else>
@@ -174,6 +175,10 @@ async function doRemove(note: Note) {
   font-size: 0.8rem;
   color: var(--color-text-muted);
   line-height: 1.5;
+}
+
+.hint a {
+  color: var(--color-fel-bright);
 }
 
 .error {
