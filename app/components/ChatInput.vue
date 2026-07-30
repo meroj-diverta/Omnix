@@ -24,7 +24,7 @@
       <textarea
         v-model="draft"
         rows="1"
-        placeholder="e.g. What does BKB mean? Who is Faceless Void?"
+        placeholder="e.g. What does QoP mean? Who is Faceless Void?"
         :disabled="isLoading"
         @keydown.enter.exact.prevent="submit"
       />

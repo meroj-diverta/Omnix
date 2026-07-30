@@ -21,7 +21,6 @@ import { nextTick, watch } from 'vue'
 import type { ChatMessage } from '~/types/chat'
 
 const SUGGESTED_PROMPTS = [
-  'What does BKB mean?',
   'Who is Faceless Void?',
   'What does CC mean?',
   'What is stacking?'
