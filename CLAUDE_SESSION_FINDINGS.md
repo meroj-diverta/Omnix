@@ -12,8 +12,14 @@ blocked on a Bedrock model-id error, not on anything conceptual.
 This file is a full session snapshot so a new Claude session (or a human)
 can pick up exactly where this one left off, even if the original chat
 history is gone. Supersedes all prior versions of this file and the
-assumptions in `KUROCO_SETUP.md`. Read this file's §6 first — it's the
-literal "what to do next" — then the rest for context as needed.
+assumptions in `KUROCO_SETUP.md`.
+
+> **Start with §12 (added 2026-07-30), then §6.** §12 records a later
+> session: the frontend now reaches Kuroco, the endpoints §7.6 called
+> missing exist, and signup is built. It resolves most of §6 item 0 and
+> contradicts §7.6's "nothing resolves" framing. `data/endpoint_status.md`
+> (re-probed 2026-07-30) is the authority on which endpoints exist;
+> §12 is the authority on what the app does with them.
 
 ## 1. Project overview
 
@@ -436,16 +442,16 @@ the user was about to check what other models are listed.
 
 ## 6. Immediate next steps (in priority order)
 
-0. **[HIGHEST — added 2026-07-28] Make the deployed frontend actually work.**
-   It currently reaches Kuroco not at all (static deploy, no server → the
-   proxy route doesn't exist). Decided fix: Kuroco member auth with
-   browser→Kuroco direct calls, login required for everything. Four pieces
-   of work, all still to do — see **§7.6** for the full detail: create the
-   missing login/logout/profile endpoints (api id 7 has only signup email
-   verification today), flip api id 6 to `cookie` security, rework
-   `useOmnix.ts` to call Kuroco directly with `credentials: 'include'`,
-   delete the dead `server/api/omnix.post.ts` and the build-time-baked
-   `omnixConfigured` flag, and add login UI + an auth guard.
+0. **[MOSTLY DONE as of 2026-07-30 — see §12, do not re-do this]** "Make the
+   deployed frontend actually work." The browser-direct + cookie-auth rework
+   is built and the endpoints exist: `server/api/omnix.post.ts` and the
+   `omnixConfigured` flag are gone, `useKuroco.ts` calls Kuroco directly with
+   `credentials: 'include'`, login/logout/profile live on api 7, signup on a
+   new api 10, and CORS accepts `localhost:3000` on both. Note api 6 was
+   **not** flipped to `cookie` — it hosts the admin MCP server, so the app
+   uses api 7/10 instead. What remains of this item: a live end-to-end run
+   with a real member, and an auth guard decision (chat currently answers
+   without a session; only notes require one). §12.5 has the full list.
 1. **Unblock and finish the AI Agent memory test** (§5.4/§5.5) — try a
    different model on `ai_agent_id: 1`, run the two-message test, record
    the verdict here.
@@ -677,7 +683,14 @@ visitor must sign up before asking even a simple question. Benefits: one
 auth model, no unauthenticated AI endpoint to abuse/cost-burn, and Stage 2's
 per-member `game_plans` needs identity regardless.
 
-**Work required to implement (none of this is done yet):**
+**Work required to implement — SUPERSEDED 2026-07-30, see §12.** Items 1 and 4
+are done (the endpoints exist and the frontend calls them; signup went to a new
+api 10 rather than api 7). Item 2 was **not** done and should not be: api 6
+hosts the admin MCP server, so the app moved to api 7/10 instead of changing
+api 6's security mode. Item 3's claim that CORS was already correct was wrong
+for the origins the app actually uses; it has since been fixed on api 7 and 10.
+The original text is kept below for the reasoning, not as a to-do list.
+
 1. **Auth endpoints are missing.** api id 7 ("Omnix User Authentication
    Endpoints") contains exactly ONE URI — `auth/email-verification`
    (`Member::invite`, uri 114), the signup email-verification step. There is
@@ -812,13 +825,146 @@ not re-explored this session.
 
 ## 11. How to resume from this file alone
 
-1. Read §6 — it's the ordered next-steps list.
-2. Re-check §5.4's blocker is still the current state (config could have
+1. Read **§12 first** (latest session, 2026-07-30), then §6 for the ordered
+   next-steps list — §12 marks item 0 as mostly done and amends §7.6.
+2. Read `data/endpoint_status.md` for which endpoints exist. It is re-probed
+   per session and is the authority on that; assume nothing from older
+   sections of this file, which described several endpoints as missing that
+   now exist.
+3. Re-check §5.4's blocker is still the current state (config could have
    changed if you left the browser open) before assuming where to resume.
-3. If the temp token (§5.3) has expired, regenerate it — same api id (8),
+   Note the AI Agent / session-memory thread has not been touched since
+   2026-07-27 — it is genuinely still open, not silently resolved.
+4. If the temp token (§5.3) has expired, regenerate it — same api id (8),
    same URIs (117/118), just need a fresh
    `rcms_api-generate_token(api_id=8, token_type="privileged_static")` call.
-4. Related persistent memory (survives across Claude sessions, separate
-   from this file): memory entries `omnix-project-overview` and
-   `feedback-omnix-kuroco-admin-manual` — kept in sync with this file's
-   headline facts, but this file is the detailed source of truth.
+   Note this token is long expired by now and api 8 is still on the cleanup
+   list (§6 item 2).
+5. Related persistent memory (survives across Claude sessions, separate from
+   this file): `project_dota2_oracle.md` and `reference_kuroco_skills.md`,
+   indexed from `MEMORY.md` in the session memory directory. (Earlier
+   versions of this file named `omnix-project-overview` and
+   `feedback-omnix-kuroco-admin-manual`; those entries do not exist.) The
+   memory holds pointers and cross-session technique notes; this file and
+   `data/endpoint_status.md` are the detailed source of truth.
+
+## 12. Session 2026-07-30 — frontend now reaches Kuroco; signup built
+
+**Read this section before §6/§7.6** — it resolves most of §6 item 0 and
+supersedes the parts of §7.6 that describe the frontend as non-functional. The
+Kuroco-side endpoint state is in `data/endpoint_status.md`, re-probed the same
+day; that file is the authority on what exists, this section on what the app
+does with it.
+
+### 12.1 The §6-item-0 blocker is largely resolved
+
+The endpoints §7.6 listed as missing now exist. Verified by HTTP probe, not
+assumed: `7/auth/login`, `7/auth/logout`, `7/auth/profile`,
+`7/chat_contents_search`, `7/notes/list` all answer, and CORS preflight from
+`http://localhost:3000` succeeds on api 7 and api 10 with
+`allowCredentials: true`. Signup lives on a **new api 10** (`auth/invite`,
+`auth/register`); `7/auth/email-verification` is gone.
+
+So the browser-direct + cookie-auth architecture chosen on 2026-07-28 is wired
+and reachable. What has **not** been done is an end-to-end run with a real
+member — see §12.5.
+
+### 12.2 Endpoint routing is now code, not env
+
+`app/composables/useKuroco.ts` holds `KUROCO_ROUTES`, a table of
+`` `{apiId}/{path}` `` strings (`'7/auth/login'`, `'10/auth/invite'`, …), and
+`request(route, opts)` takes a route instead of a path plus an optional `apiId`.
+The eleven `NUXT_PUBLIC_*` endpoint/api-id env vars are gone; only
+`NUXT_PUBLIC_KUROCO_API_BASE` remains.
+
+Rationale, because it will look like a regression to anyone who likes env
+config: `public` runtimeConfig is baked in at `nuxt generate` time on a static
+deploy, so an env var was never changeable at runtime — it only spread each URL
+across three files. Moving an endpoint is a rebuild either way. A
+template-literal type (`` `${number}/${string}` ``) makes a route missing its api
+id a compile error, and dropping the old `?? apiIds.chat` default means a call
+can no longer be silently misrouted to the chat structure by omission.
+
+### 12.3 Kuroco's error text now reaches the user
+
+`request()` reads and parses the body **before** any status branching. Previously
+`!response.ok` was tested first, so every 400/422 surfaced as "Kuroco returned
+HTTP 422." and the only useful text — `Invalid E-mail`, `Invalid URL`,
+`Password is required` — was discarded into an unread `detail` field. The 401
+branch likewise threw away `The password or e-mail (Login ID) is incorrect.`
+
+Rules now in force, per explicit user instruction:
+- Server wording passes through **verbatim**. Never paraphrased, never replaced
+  with a guess at the cause. If Kuroco's message is unclear, unclear is shown.
+- Text written by the app must **read like a default** (`Something went wrong
+  (HTTP 422).`) so it cannot be mistaken for the server's.
+- 401/403 keeps `kind: 'auth'` regardless of message, because `refresh()` relies
+  on that to treat "not signed in" as the expected answer rather than a fault.
+- Deliberate exceptions, each in the app's own voice: the network/CORS hint, the
+  404 "endpoint not created on structure N" text (the gateway names neither the
+  path nor the structure), and the non-JSON-response line.
+
+### 12.4 Signup: three steps, two endpoints, one page
+
+`useAuth.ts` gained `getEmailOtp`, `verifyEmailWithOtp`, `signUp` (all exported)
+and a `describeFailure` helper. `app/pages/register.vue` is a standalone page at
+`/register` implementing:
+
+| Step | Call | Body |
+|---|---|---|
+| 1 | `10/auth/invite` | `{email, ext_info:{name1, name2}}` — mails the code |
+| 2 | `10/auth/invite` | `{email_hash}` — the code from the mail, same endpoint |
+| 3 | `10/auth/register` | `{email, name1, name2, login_pwd}` |
+
+**`email_hash` is the code itself**, not a hash of the address — this cost real
+confusion. Full request contract, including which properties each `oneOf` branch
+rejects, is in `data/endpoint_status.md`. Registration ends by calling `signIn`
+and redirecting home; if that fails the account still exists, and the page says
+so rather than implying nothing happened. `NotesPane` keeps sign-in only and
+links to the page (that link is also how the prerender crawler finds the route).
+
+Bugs fixed in the composable while building this: three `if (response.errors)`
+blocks that reported failure on success (Kuroco returns `errors: []`, and an
+empty array is truthy) and were unreachable for real errors; `signUp` returning
+`true` after a failure; and the three functions being absent from the
+composable's `return`, so no component could call them.
+
+### 12.5 Open items — carried forward, none of them blocked on us
+
+1. **Nothing ties a verified `email_hash` to `auth/register`.** That endpoint
+   demands only `login_pwd`/`name1`/`email` and ignores unknown properties, so on
+   current evidence the verification steps are bypassable. Needs a look at the
+   parameter list in `api_info/?api_id=10`; the durable fix is the tutorial's
+   pattern — `Member::insert` on an internal API, called only after the check.
+2. **The live three-step run is untested.** Step 1 mails a real code, so it needs
+   a real mailbox. Everything up to the network boundary is verified.
+3. **`ext_info: {name1, name2}` pass-through is unverified** — the schema accepts
+   any object, but whether `Member::invite` carries core member columns into the
+   provisional record is not observable from outside. Harmless if dropped, since
+   step 3 sends them again.
+4. **Per-member scoping for `notes/list` is still unenforced** (§7.6 / endpoint
+   doc). Unchanged.
+5. `isChecking` is shared between the session check and every auth call, so the
+   sign-in button reads "Signing in…" during the initial `refresh()`.
+
+### 12.6 Layout fixes, and how they were verified
+
+The codex-pane toggle's `display: block` lived only inside the
+`max-width: 900px` media query while its base rule was `display: none`, so the
+button's existence depended on the viewport while `paneOpen` did not: close the
+pane on a narrow screen, widen past the breakpoint, and there was no control left
+to reopen it. Also `v-show` left the pane's 20rem grid track in place, and
+`main.content`'s centred `max-width: 72rem` put the leftover space *outside* the
+pane (measured 64px either side at 1280px, 224px at 1600px) so the pane never
+reached the window edge.
+
+**Verification technique worth reusing**: headless Chrome driven over CDP from a
+plain node script — no puppeteer/playwright in this project. Launch Chrome with
+`--headless=new --remote-debugging-port=9222`, read the target list from
+`http://127.0.0.1:9222/json/list`, then talk CDP over a WebSocket. Node here is
+v20, so the global `WebSocket` needs `node --experimental-websocket`. With that,
+`Emulation.setDeviceMetricsOverride` + `Runtime.evaluate` measure computed styles
+and rects at any viewport, `elementFromPoint` proves a control is actually
+clickable rather than merely present, and `Page.captureScreenshot` gives an image
+to look at. This is how the toggle bug was reproduced as a fact
+(`buttonDisplay: "none"` at 1200px closed) instead of argued about.
