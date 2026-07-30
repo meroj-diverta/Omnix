@@ -2,6 +2,8 @@
   <div class="bubble-row" :class="message.role">
     <div class="avatar" v-if="message.role === 'omnix'">☗</div>
     <div class="bubble" :class="{ error: message.isError }">
+      <!-- Which operation produced this, so mixed-mode threads stay comparable. -->
+      <p v-if="modeLabel" class="mode-tag">{{ modeLabel }}</p>
       <p v-if="message.role === 'user'" class="text">{{ message.text }}</p>
       <div v-else class="markdown" v-html="renderedText" />
       <div class="images" v-if="message.images?.length">
@@ -23,6 +25,13 @@ import type { ChatMessage } from '~/types/chat'
 const props = defineProps<{ message: ChatMessage }>()
 
 const renderedText = computed(() => DOMPurify.sanitize(marked.parse(props.message.text, { async: false })))
+
+/** Only tagged on replies, and only when the mode is not the default one. */
+const modeLabel = computed(() => {
+  if (props.message.role !== 'omnix' || !props.message.mode || props.message.mode === 'answer') return ''
+  const info = CHAT_MODES.find((m) => m.key === props.message.mode)
+  return info ? `${info.label} · ${info.operation}` : ''
+})
 </script>
 
 <style scoped>
@@ -78,6 +87,15 @@ const renderedText = computed(() => DOMPurify.sanitize(marked.parse(props.messag
 .text {
   margin: 0;
   white-space: pre-wrap;
+}
+
+.mode-tag {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-fel-bright);
+  opacity: 0.85;
 }
 
 .markdown :deep(> *:first-child) {

@@ -1,22 +1,46 @@
 <template>
-  <form class="chat-input" @submit.prevent="submit">
-    <textarea
-      v-model="draft"
-      rows="1"
-      placeholder="e.g. What does BKB mean? Who is Faceless Void?"
-      :disabled="isLoading"
-      @keydown.enter.exact.prevent="submit"
-    />
-    <button type="submit" :disabled="isLoading || !draft.trim()">
-      <span v-if="isLoading">...</span>
-      <span v-else>Ask ☗</span>
-    </button>
-  </form>
+  <div class="input-area">
+    <!--
+      Mode picker. Each option is a different Kuroco AI operation, so asking the
+      same question twice in two modes is a direct comparison of retrieval vs
+      generation behaviour.
+    -->
+    <div class="modes" role="radiogroup" aria-label="Answer mode">
+      <button
+        v-for="m in modes"
+        :key="m.key"
+        type="button"
+        role="radio"
+        :aria-checked="m.key === mode"
+        :class="{ on: m.key === mode }"
+        :title="`${m.hint} — ${m.operation}`"
+        @click="emit('update:mode', m.key)"
+      >
+        {{ m.label }}
+      </button>
+    </div>
+
+    <form class="chat-input" @submit.prevent="submit">
+      <textarea
+        v-model="draft"
+        rows="1"
+        placeholder="e.g. What does BKB mean? Who is Faceless Void?"
+        :disabled="isLoading"
+        @keydown.enter.exact.prevent="submit"
+      />
+      <button type="submit" :disabled="isLoading || !draft.trim()">
+        <span v-if="isLoading">...</span>
+        <span v-else>Ask ☗</span>
+      </button>
+    </form>
+  </div>
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ isLoading: boolean }>()
-const emit = defineEmits<{ ask: [query: string] }>()
+import type { ChatMode, ChatModeInfo } from '~/types/chat'
+
+const props = defineProps<{ isLoading: boolean; mode: ChatMode; modes: ChatModeInfo[] }>()
+const emit = defineEmits<{ ask: [query: string]; 'update:mode': [mode: ChatMode] }>()
 
 const draft = ref('')
 
@@ -28,12 +52,37 @@ function submit() {
 </script>
 
 <style scoped>
+.input-area {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-void-2);
+}
+
+.modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.6rem 1rem 0;
+}
+
+.modes button {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.72rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.modes button.on {
+  border-color: var(--color-fel);
+  color: var(--color-fel-bright);
+}
+
 .chat-input {
   display: flex;
   gap: 0.6rem;
-  padding: 1rem;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-void-2);
+  padding: 0.6rem 1rem 1rem;
 }
 
 textarea {

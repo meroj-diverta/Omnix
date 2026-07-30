@@ -1,12 +1,34 @@
-import type { ChatMessage, OmnixResponse } from '~/types/chat'
-import type { KurocoChatResponse } from '~/types/kuroco'
+import type { ChatMessage, ChatMode, ChatModeInfo, OmnixResponse } from '~/types/chat'
+import type { KurocoChatResponse, KurocoSearchHit } from '~/types/kuroco'
 import { KurocoError } from '~/types/kuroco'
+
+/**
+ * The four single-shot Kuroco AI operations, as selectable chat modes.
+ *
+ * They differ in whether they retrieve, whether they generate, or both:
+ *
+ *   answer        retrieval + generation   OpenAI::chat_contents_search
+ *   supplementary retrieval + generation   OpenAI::chat_supplementary_search
+ *   sources       retrieval only           OpenAI::rag_search
+ *   raw           generation only          OpenAI::chat
+ *
+ * `sources` and `raw` currently exist only on api 6, which is static_token and
+ * cannot be called from a browser. Selecting them reports which path is missing
+ * on which structure — see KUROCO_ROUTES.
+ */
+export const CHAT_MODES: ChatModeInfo[] = [
+  { key: 'answer', label: 'Answer', hint: 'Retrieve + generate — the normal mode', operation: 'chat_contents_search' },
+  { key: 'supplementary', label: 'Supplementary', hint: 'Retrieve + generate over the supplementary source', operation: 'chat_supplementary_search' },
+  { key: 'sources', label: 'Sources only', hint: 'Retrieve, no generated answer', operation: 'rag_search' },
+  { key: 'raw', label: 'No retrieval', hint: 'Plain model answer, ignores indexed content', operation: 'chat' }
+]
 
 export function useOmnix() {
   const { request, routes, decodeEntities } = useKuroco()
 
   const messages = useState<ChatMessage[]>('omnix-messages', () => [])
   const isLoading = useState('omnix-loading', () => false)
+  const mode = useState<ChatMode>('omnix-mode', () => 'answer')
 
   function pushMessage(message: Omit<ChatMessage, 'id' | 'createdAt'>) {
     messages.value.push({
@@ -16,20 +38,43 @@ export function useOmnix() {
     })
   }
 
-  function toOmnixResponse(res: KurocoChatResponse): OmnixResponse {
-    const hits = res.list ?? []
-    return {
-      answer: res.reply || res.messages?.[0] || '',
-      sources: hits
-        .filter((h) => h.subject || h.slug)
-        .map((h) => ({ subject: decodeEntities(String(h.subject ?? '')), slug: String(h.slug ?? '') })),
-      images: hits
-        .filter((h) => h.image)
-        .map((h) => ({ url: String(h.image), alt: decodeEntities(String(h.subject ?? '')) }))
-    }
+  function toSources(hits: KurocoSearchHit[]) {
+    return hits
+      .filter((h) => h.subject || h.slug)
+      .map((h) => ({ subject: decodeEntities(String(h.subject ?? '')), slug: String(h.slug ?? '') }))
   }
 
-  async function ask(query: string) {
+  function toImages(hits: KurocoSearchHit[]) {
+    return hits
+      .filter((h) => h.image)
+      .map((h) => ({ url: String(h.image), alt: decodeEntities(String(h.subject ?? '')) }))
+  }
+
+  /**
+   * `rag_search` returns matches with no generated answer, so the retrieved text
+   * itself becomes the reply body. It is rendered as-is: nothing is summarised
+   * or paraphrased here, because the point of this mode is seeing what retrieval
+   * actually returned before a model touches it.
+   */
+  function retrievalOnlyBody(hits: KurocoSearchHit[]): string {
+    if (!hits.length) return ''
+    return hits
+      .map((h, i) => {
+        const title = decodeEntities(String(h.subject ?? `Match ${i + 1}`))
+        const distance = typeof h.vector_distance === 'number' ? ` _(distance ${h.vector_distance.toFixed(3)})_` : ''
+        const body = decodeEntities(String((h as Record<string, unknown>).contents ?? '')).trim()
+        return `**${title}**${distance}${body ? `\n\n${body}` : ''}`
+      })
+      .join('\n\n---\n\n')
+  }
+
+  function normalise(res: KurocoChatResponse, forMode: ChatMode): OmnixResponse {
+    const hits = res.list ?? []
+    const answer = forMode === 'sources' ? retrievalOnlyBody(hits) : res.reply || res.messages?.[0] || ''
+    return { answer, sources: toSources(hits), images: toImages(hits) }
+  }
+
+  async function ask(query: string, asMode: ChatMode = mode.value) {
     const trimmed = query.trim()
     if (!trimmed || isLoading.value) return
 
@@ -45,17 +90,22 @@ export function useOmnix() {
     // worst failure mode for a tool whose entire job is being trusted on facts.
     isLoading.value = true
     try {
-      const res = await request<KurocoChatResponse>(routes.chat, {
-        method: 'POST',
-        body: { text: trimmed }
-      })
-      const response = toOmnixResponse(res)
+      // rag_search takes its query on the query string, not in a JSON body —
+      // confirmed against the live endpoint on api 6. The other three take
+      // {text} by POST.
+      const res =
+        asMode === 'sources'
+          ? await request<KurocoChatResponse>(routes.ragSearch, { method: 'GET', query: { query: trimmed } })
+          : await request<KurocoChatResponse>(routeFor(asMode), { method: 'POST', body: { text: trimmed } })
+
+      const response = normalise(res, asMode)
 
       if (!response.answer) {
         // A 200 with an empty reply is a real outcome: retrieval found nothing,
         // or the model returned nothing. Report it as such — do not paper over it.
         pushMessage({
           role: 'omnix',
+          mode: asMode,
           text: 'Kuroco answered, but returned no text for that question. There may be nothing in the indexed content that matches it.',
           sources: response.sources,
           isError: true
@@ -65,6 +115,7 @@ export function useOmnix() {
 
       pushMessage({
         role: 'omnix',
+        mode: asMode,
         text: response.answer,
         images: response.images,
         sources: response.sources
@@ -73,13 +124,26 @@ export function useOmnix() {
       // Name the failing layer. A catch-all "connection failed" cost real
       // debugging time, because from inside the browser a blocked CORS preflight
       // is indistinguishable from an unreachable host.
-      pushMessage({ role: 'omnix', text: explain(error), isError: true })
+      pushMessage({ role: 'omnix', mode: asMode, text: explain(error), isError: true })
     } finally {
       isLoading.value = false
     }
   }
 
-  return { messages, isLoading, ask }
+  function routeFor(m: ChatMode) {
+    switch (m) {
+      case 'supplementary':
+        return routes.chatSupplementary
+      case 'raw':
+        return routes.chatPlain
+      case 'sources':
+        return routes.ragSearch
+      default:
+        return routes.chat
+    }
+  }
+
+  return { messages, isLoading, mode, modes: CHAT_MODES, ask }
 }
 
 function explain(error: unknown): string {
@@ -90,7 +154,7 @@ function explain(error: unknown): string {
       case 'auth':
         return 'Your Kuroco session was rejected or has expired. Sign in again from the panel on the right.'
       case 'missing':
-        return `Omnix is pointed at an endpoint that does not exist yet. ${error.message}`
+        return `That mode's endpoint does not exist yet. ${error.message}`
       case 'api':
         return `Kuroco rejected the question: ${error.message}`
       default:

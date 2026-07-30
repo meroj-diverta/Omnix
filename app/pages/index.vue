@@ -2,7 +2,7 @@
   <div class="workspace" :class="{ 'pane-closed': !paneOpen }">
     <section class="chat-col">
       <ChatWindow :messages="messages" :is-loading="isLoading" @ask="ask" />
-      <ChatInput :is-loading="isLoading" @ask="ask" />
+      <ChatInput :is-loading="isLoading" :mode="mode" :modes="modes" @ask="ask" @update:mode="mode = $event" />
     </section>
 
     <button
@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-const { messages, isLoading, ask } = useOmnix()
+const { messages, isLoading, mode, modes, ask } = useOmnix()
 
 // Open by default on wide screens; the toggle keeps chat usable on narrow ones.
 const paneOpen = ref(true)

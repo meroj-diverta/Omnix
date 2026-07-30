@@ -46,7 +46,16 @@ export type KurocoRoute = `${number}/${string}`
  *      called from the browser — that would mean shipping a token in the bundle.
  */
 export const KUROCO_ROUTES = {
+  // The four single-shot AI operations, one per chat mode. Verified live
+  // 2026-07-30: chat_contents_search and chat_supplementary_search exist on
+  // api 7; rag_search and chat exist only on api 6, which is static_token and
+  // therefore unusable from a browser. Listed here anyway so the mode selector
+  // is complete — until they are created on api 7 the client reports exactly
+  // which path is missing on which structure, which is the useful failure.
   chat: '7/chat_contents_search',
+  chatSupplementary: '7/chat_supplementary_search',
+  ragSearch: '7/rag_search',
+  chatPlain: '7/chat',
 
   login: '7/auth/login',
   logout: '7/auth/logout',
@@ -106,10 +115,17 @@ export function useKuroco() {
       if (v !== undefined) url.searchParams.set(k, String(v))
     }
 
-    // Content-Type is the only header we set. Deliberate: it keeps the request
-    // "simple" enough that the only CORS requirements are the origin and
-    // allowCredentials — no custom header needs allow-listing per structure.
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    // Content-Type is the only header we set, and only when there is a body.
+    //
+    // Setting it on a GET is not harmless: `application/json` is not a
+    // CORS-safelisted value, so it forces a preflight, and a preflight against a
+    // path that does not exist fails opaquely. The browser then reports an
+    // indistinguishable network error instead of the 404 — which cost real
+    // confusion once already, because the "endpoint not created on structure N"
+    // message below never got a chance to fire. Without the header a GET is a
+    // simple request, no preflight, and real statuses come through.
+    const headers: Record<string, string> =
+      method === 'GET' ? {} : { 'Content-Type': 'application/json' }
 
     let response: Response
     try {

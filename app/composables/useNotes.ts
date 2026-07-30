@@ -116,10 +116,9 @@ export function useNotes() {
     isSaving.value = true
     error.value = null
     try {
-      await request(routes.notesUpdate, {
+      await request(`${routes.notesUpdate}/${note.id}`, {
         method: 'POST',
         body: {
-          topics_id: note.id,
           subject: note.title.trim() || 'Untitled note',
           contents: note.body,
           note_kind: note.kind
@@ -139,7 +138,7 @@ export function useNotes() {
     isSaving.value = true
     error.value = null
     try {
-      await request(routes.notesDelete, {
+      await request(`${routes.notesDelete}/${id}`, {
         method: 'POST',
         body: { topics_id: id }
       })
