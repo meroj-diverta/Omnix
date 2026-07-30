@@ -18,17 +18,20 @@
 }
 
 /*
- * Widened from 42rem to fit the chat column alongside the codex pane. The 42rem
- * reading measure is preserved on the chat column itself (see ChatWindow), so
- * prose does not stretch on wide screens.
+ * Full-bleed on purpose, so the codex pane reaches the window edge. Capping this
+ * at 72rem and centring it used to leave the pane floating in dead space —
+ * 64px of it at 1280px wide, 224px at 1600px, growing with the viewport, since
+ * the leftover margin lands to the right of the pane rather than around it.
+ *
+ * Width is owned per page instead: the chat column keeps a 42rem reading measure
+ * (see ChatWindow) and the register card its own, so prose still does not
+ * stretch on a wide screen.
  */
 .content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 72rem;
   width: 100%;
-  margin: 0 auto;
   min-height: 0;
 }
 
