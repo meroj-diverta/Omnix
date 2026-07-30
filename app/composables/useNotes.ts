@@ -33,7 +33,7 @@ export interface NoteDraft {
  * visible instead of silent.
  */
 export function useNotes() {
-  const { request, apiIds, endpoints, decodeEntities } = useKuroco()
+  const { request, routes, decodeEntities } = useKuroco()
   const { member, isSignedIn } = useAuth()
 
   const notes = useState<Note[]>('omnix-notes', () => [])
@@ -77,8 +77,7 @@ export function useNotes() {
     isLoading.value = true
     error.value = null
     try {
-      const res = await request<KurocoTopicsList>(endpoints.notesList, {
-        apiId: apiIds.notes,
+      const res = await request<KurocoTopicsList>(routes.notesList, {
         method: 'GET',
         query: { cnt: 200 }
       })
@@ -99,8 +98,7 @@ export function useNotes() {
     isSaving.value = true
     error.value = null
     try {
-      await request(endpoints.notesCreate, {
-        apiId: apiIds.notes,
+      await request(routes.notesCreate, {
         method: 'POST',
         body: { subject: draft.title.trim() || 'Untitled note', contents: draft.body, note_kind: draft.kind }
       })
@@ -118,8 +116,7 @@ export function useNotes() {
     isSaving.value = true
     error.value = null
     try {
-      await request(endpoints.notesUpdate, {
-        apiId: apiIds.notes,
+      await request(routes.notesUpdate, {
         method: 'POST',
         body: {
           topics_id: note.id,
@@ -142,8 +139,7 @@ export function useNotes() {
     isSaving.value = true
     error.value = null
     try {
-      await request(endpoints.notesDelete, {
-        apiId: apiIds.notes,
+      await request(routes.notesDelete, {
         method: 'POST',
         body: { topics_id: id }
       })

@@ -13,7 +13,7 @@ import { KurocoError } from '~/types/kuroco'
  * allowCredentials true and this origin listed in its CORS origins.
  */
 export function useAuth() {
-  const { request, apiIds, endpoints } = useKuroco()
+  const { request, routes } = useKuroco()
 
   const member = useState<KurocoProfile | null>('omnix-member', () => null)
   const isChecking = useState('omnix-auth-checking', () => false)
@@ -40,8 +40,7 @@ export function useAuth() {
     isChecking.value = true
     authError.value = null
     try {
-      const profile = await request<KurocoProfile>(endpoints.profile, {
-        apiId: apiIds.auth,
+      const profile = await request<KurocoProfile>(routes.profile, {
         method: 'GET'
       })
       member.value = profile?.member_id ? profile : null
@@ -59,8 +58,7 @@ export function useAuth() {
     isChecking.value = true
     authError.value = null
     try {
-      await request(endpoints.login, {
-        apiId: apiIds.auth,
+      await request(routes.login, {
         method: 'POST',
         body: { email, password }
       })
@@ -85,7 +83,7 @@ export function useAuth() {
 
   async function signOut(): Promise<void> {
     try {
-      await request(endpoints.logout, { apiId: apiIds.auth, method: 'POST' })
+      await request(routes.logout, { method: 'POST' })
     } catch {
       // Clearing local state matters more than a clean server-side logout.
     } finally {

@@ -3,7 +3,7 @@ import type { KurocoChatResponse } from '~/types/kuroco'
 import { KurocoError } from '~/types/kuroco'
 
 export function useOmnix() {
-  const { request, apiIds, endpoints, decodeEntities } = useKuroco()
+  const { request, routes, decodeEntities } = useKuroco()
 
   const messages = useState<ChatMessage[]>('omnix-messages', () => [])
   const isLoading = useState('omnix-loading', () => false)
@@ -45,8 +45,7 @@ export function useOmnix() {
     // worst failure mode for a tool whose entire job is being trusted on facts.
     isLoading.value = true
     try {
-      const res = await request<KurocoChatResponse>(endpoints.chat, {
-        apiId: apiIds.chat,
+      const res = await request<KurocoChatResponse>(routes.chat, {
         method: 'POST',
         body: { text: trimmed }
       })

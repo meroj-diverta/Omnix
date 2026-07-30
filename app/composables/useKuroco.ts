@@ -22,9 +22,43 @@ import { KurocoError } from '~/types/kuroco'
  *    `cookie` security mode, and the member signs in like a normal user.
  */
 
+/**
+ * `{apiId}/{path}` — everything after `/rcms-api/`. The api id is part of the
+ * route because it is part of the URL, and it is what selects the structure's
+ * security mode and CORS config (point 1 above).
+ */
+export type KurocoRoute = `${number}/${string}`
+
+/**
+ * Every Kuroco endpoint this app calls.
+ *
+ * Hardcoded rather than read from `runtimeConfig`/env on purpose: `public`
+ * runtimeConfig is baked in at `nuxt generate` time on a static deploy, so an
+ * env var is no more changeable at runtime than a literal here — it only spread
+ * one URL across three files. Moving an endpoint to another structure is a
+ * rebuild either way, so make it an edit to this table.
+ *
+ * 7 = "Omnix User Authentication Endpoints" (security: cookie). Api 6 is
+ * static_token and hosts the admin MCP server, so it is deliberately not called
+ * from the browser — that would mean shipping a token in the bundle.
+ */
+export const KUROCO_ROUTES = {
+  chat: '7/chat_contents_search',
+  login: '7/auth/login',
+  logout: '7/auth/logout',
+  // Signup. Api 7 currently has only `auth/email-verification` (Member::invite,
+  // the step that mails the token), so this needs creating alongside the rest.
+  register: '7/auth/register',
+  profile: '7/auth/profile',
+  notesList: '7/notes/list',
+  notesCreate: '7/notes/create',
+  notesUpdate: '7/notes/update',
+  notesDelete: '7/notes/delete'
+} as const satisfies Record<string, KurocoRoute>
+
+export type KurocoRouteName = keyof typeof KUROCO_ROUTES
+
 export interface KurocoRequestOptions {
-  /** Which API structure to hit. Defaults to the chat structure. */
-  apiId?: string | number
   method?: 'GET' | 'POST'
   body?: Record<string, unknown>
   query?: Record<string, string | number | undefined>
@@ -50,31 +84,17 @@ export function useKuroco() {
   const config = useRuntimeConfig()
   const base = String(config.public.kurocoApiBase || '').replace(/\/$/, '')
 
-  const apiIds = {
-    chat: String(config.public.kurocoApiId || '6'),
-    auth: String(config.public.kurocoAuthApiId || '7'),
-    notes: String(config.public.kurocoNotesApiId || '7')
-  }
-
-  const endpoints = {
-    chat: String(config.public.omnixEndpoint || 'chat_contents_search'),
-    login: String(config.public.authLoginPath || 'auth/login'),
-    logout: String(config.public.authLogoutPath || 'auth/logout'),
-    profile: String(config.public.authProfilePath || 'auth/profile'),
-    notesList: String(config.public.notesListPath || 'notes/list'),
-    notesCreate: String(config.public.notesCreatePath || 'notes/create'),
-    notesUpdate: String(config.public.notesUpdatePath || 'notes/update'),
-    notesDelete: String(config.public.notesDeletePath || 'notes/delete')
-  }
-
   async function request<T extends KurocoEnvelope>(
-    path: string,
+    route: KurocoRoute,
     options: KurocoRequestOptions = {}
   ): Promise<T> {
-    const apiId = String(options.apiId ?? apiIds.chat)
     const method = options.method ?? 'POST'
+    // Split only for the error messages below — the request itself uses the
+    // route verbatim.
+    const [apiId, ...rest] = route.split('/')
+    const path = rest.join('/')
 
-    const url = new URL(`${base}/rcms-api/${apiId}/${path.replace(/^\//, '')}`)
+    const url = new URL(`${base}/rcms-api/${route}`)
     for (const [k, v] of Object.entries(options.query ?? {})) {
       if (v !== undefined) url.searchParams.set(k, String(v))
     }
@@ -147,7 +167,7 @@ export function useKuroco() {
     return payload
   }
 
-  return { request, apiIds, endpoints, base, decodeEntities }
+  return { request, routes: KUROCO_ROUTES, base, decodeEntities }
 }
 
 /** Kuroco error entries are sometimes strings, sometimes {message}/{msg} objects. */
