@@ -1,0 +1,68 @@
+search,replace,class
+\bbkb\b,Black King Bar (BKB),Noun
+\bBlink\b,Blink Dagger,Noun
+\bShard\b,Aghanim's Shard,Noun
+\bHex\b,Scythe of Vyse (Hex),Noun
+\bSheep\b,Scythe of Vyse (Hex),Noun
+\bManta\b,Manta Style,Noun
+\bMeka\b,Mekansm,Noun
+\bPipe\b,Pipe of Insight,Noun
+\bForce\b,Force Staff,Noun
+\bGlimmer\b,Glimmer Cape,Noun
+\bOrchid\b,Orchid Malevolence,Noun
+\bHeart\b,Heart of Tarrasque,Noun
+\bTravels\b,Boots of Travel,Noun
+\bPhase\b,Phase Boots,Noun
+\bTreads\b,Power Treads,Noun
+\bArcanes\b,Arcane Boots,Noun
+\bTranquils\b,Tranquil Boots,Noun
+\bWand\b,Magic Wand,Noun
+\bStick\b,Magic Stick,Noun
+\bDust\b,Dust of Appearance,Noun
+\bSentry\b,Sentry Ward,Noun
+\bObs\b,Observer Ward,Noun
+\bSmoke\b,Smoke of Deceit,Noun
+\bTP\b,Town Portal Scroll (TP),Noun
+\btp\b,Town Portal Scroll (TP),Noun
+\bCS\b,"creep score, last hitting (CS)",Noun
+\bdeny\b,denying creeps to starve the enemy of experience,Verb
+\bpull\b,pulling the lane creeps into a neutral camp,Verb
+\broam\b,roaming between lanes to find kills,Verb
+\binitiate\b,initiating a team fight,Verb
+\bkite\b,"kiting, attacking while retreating",Verb
+\bfarm\b,farming gold and experience,Verb
+\bpush\b,pushing a lane toward enemy towers,Verb
+\bdive\b,tower diving,Verb
+\bturbo\b,Turbo game mode,Noun
+\bmeta\b,the current metagame,Noun
+\bsafelane\b,safe lane,Noun
+\bofflane\b,off lane,Noun
+\bmid\b,mid lane,Noun
+\bAM\b,Anti-Mage,Noun
+\bPA\b,Phantom Assassin,Noun
+\bPL\b,Phantom Lancer,Noun
+\bSF\b,Shadow Fiend,Noun
+\bTA\b,Templar Assassin,Noun
+\bCM\b,Crystal Maiden,Noun
+\bWD\b,Witch Doctor,Noun
+\bSK\b,Sand King,Noun
+\bWK\b,Wraith King,Noun
+\bDK\b,Dragon Knight,Noun
+\bLC\b,Legion Commander,Noun
+\bCK\b,Chaos Knight,Noun
+\bAA\b,Ancient Apparition,Noun
+\bNP\b,Nature's Prophet,Noun
+\bOD\b,Outworld Devourer,Noun
+\bTB\b,Terrorblade,Noun
+\bBH\b,Bounty Hunter,Noun
+\bBS\b,Bloodseeker,Noun
+\bES\b,Earthshaker,Noun
+\bSD\b,Shadow Demon,Noun
+\bSS\b,Shadow Shaman,Noun
+\bMK\b,Monkey King,Noun
+\bVoid\b,Faceless Void,Noun
+\bFurion\b,Nature's Prophet,Noun
+\bNecro\b,Necrophos,Noun
+\bMagina\b,Anti-Mage,Noun
+\bYurnero\b,Juggernaut,Noun
+\bJugg\b,Juggernaut,Noun

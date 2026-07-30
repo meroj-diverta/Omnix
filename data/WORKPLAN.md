@@ -102,13 +102,26 @@ calls `7/notes/*`; only what sits behind those paths changes.
   `chat_supplementary_search`. **Add group 12 — and 20 once populated — to the api 7
   endpoint's `topics_group_id`.** Until then Answer mode cannot discuss any item,
   and most of the dictionary's item entries have nothing to match.
-- **O23** — Dictionary rows held back deliberately: `jargon_dict_kuroco_deferred.csv`
-  (67 rows) contains keys unsafe for naive substring replacement — `mid` would
-  corrupt "Midas", `AM` would corrupt "teamfight". Upload one (`AM`) on purpose as
-  a word-boundary test, then decide whether the rest need Regex mode.
-- **O24** — Replies can come from model knowledge when retrieval misses (F21). So
-  `eval/run_eval.py` must score the returned `list`, not the reply prose — check
-  whether it currently does before trusting any measurement from it.
+- **O23** — Finish the dictionary in three phases. Blast radius is small: F19
+  established replacement happens on the **query**, so a bad rule spoils one
+  search rather than corrupting stored content — test aggressively.
+  1. Add a single risky row (`AM,Anti-Mage,Noun`) to the plain dictionary and ask
+     *"what happens in a teamfight?"*. If retrieval visibly changes, Kuroco is
+     doing naive substring replacement ("te**Anti-Mage**fight") → finding.
+  2. Then load `jargon_dict_kuroco_regex.csv` (67 rows, `\bkey\b`) into a
+     **second** dictionary with Regex ON. Regex is a per-dictionary toggle, not
+     per-row, so plain and regex rules cannot share one dictionary — which also
+     exercises the Priority field. Set the regex dictionary higher priority.
+  3. Compare: if `\b` works, the full 111 usable rows are safe. If Kuroco's regex
+     does not support `\b`, that is the finding, and the ~30 two-letter hero
+     abbreviations stay out.
+  Files: `jargon_dict_kuroco_pilot.csv` (44, loaded), `..._deferred.csv` (67,
+  plain, held), `..._regex.csv` (67, boundary-guarded, ready).
+- **O24** — ☑ Resolved 2026-07-30: `eval/run_eval.py` already scores the returned
+  `list` (slug, `topics_group_id`, `vector_distance`), not reply prose, so it is
+  immune to the F21 grounding problem. It reads api 6 + `KUROCO_ACCESS_TOKEN` from
+  `.env` — which is why `6/rag_main_search` is worth keeping even though the
+  browser cannot use it.
 
 ### Chat modes
 
