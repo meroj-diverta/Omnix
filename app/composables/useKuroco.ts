@@ -38,18 +38,25 @@ export type KurocoRoute = `${number}/${string}`
  * one URL across three files. Moving an endpoint to another structure is a
  * rebuild either way, so make it an edit to this table.
  *
- * 7 = "Omnix User Authentication Endpoints" (security: cookie). Api 6 is
- * static_token and hosts the admin MCP server, so it is deliberately not called
- * from the browser — that would mean shipping a token in the bundle.
+ * 7  = "Omnix User Authentication Endpoints" (security: cookie) — chat, session
+ *      and notes.
+ * 10  = signup. Both routes are the same `Member::invite` endpoint plus the
+ *      register endpoint; see useAuth.ts for the two-step body contract.
+ * 6   = static_token and hosts the admin MCP server, so it is deliberately not
+ *      called from the browser — that would mean shipping a token in the bundle.
  */
 export const KUROCO_ROUTES = {
   chat: '7/chat_contents_search',
+
   login: '7/auth/login',
   logout: '7/auth/logout',
-  // Signup. Api 7 currently has only `auth/email-verification` (Member::invite,
-  // the step that mails the token), so this needs creating alongside the rest.
-  register: '7/auth/register',
   profile: '7/auth/profile',
+
+  // Signup. emailValidate is called twice with different bodies: `{email,
+  // ext_info}` issues the code, `{email_hash}` verifies it.
+  emailValidate: '10/auth/invite',
+  register: '10/auth/register',
+
   notesList: '7/notes/list',
   notesCreate: '7/notes/create',
   notesUpdate: '7/notes/update',
@@ -126,22 +133,6 @@ export function useKuroco() {
       )
     }
 
-    if (response.status === 401 || response.status === 403) {
-      throw new KurocoError('auth', 'Not signed in, or the session expired.', response.status)
-    }
-
-    // Kuroco returns 404 + "[GW] API using this path does not exist" for a path
-    // that was never defined on that structure. Name both so the fix is obvious;
-    // otherwise this reads like a routing or auth bug.
-    if (response.status === 404) {
-      throw new KurocoError(
-        'missing',
-        `No endpoint "${path}" on Kuroco API structure ${apiId}. It has to be created in the ` +
-          `admin UI (API > structure ${apiId} > add endpoint) before the app can call it.`,
-        404
-      )
-    }
-
     const raw = await response.text()
     let payload: T
     try {
@@ -155,13 +146,49 @@ export function useKuroco() {
       )
     }
 
-    if (!response.ok) {
-      throw new KurocoError('http', `Kuroco returned HTTP ${response.status}.`, response.status, payload)
+    // The body is read before any status branching, because Kuroco's own message
+    // is the only text that describes the actual failure — "Invalid E-mail",
+    // "Invalid URL", "Password is required", "The password or e-mail (Login ID)
+    // is incorrect." — and it arrives in `errors` on 401/400/422 exactly as it
+    // does on a 200. Pass it through verbatim wherever it exists: do not
+    // paraphrase it, and do not substitute a guess about the cause. If Kuroco's
+    // wording is unclear, unclear is the honest thing to show.
+    const serverMessage =
+      Array.isArray(payload.errors) && payload.errors.length ? summariseErrors(payload.errors) : ''
+
+    // 401/403 keeps kind 'auth' whatever the message says — refresh() depends on
+    // that to read "not signed in" as the expected answer rather than a fault.
+    if (response.status === 401 || response.status === 403) {
+      throw new KurocoError(
+        'auth',
+        // Flatly generic when Kuroco sent no text, so that a message written
+        // here can never be mistaken for one written by the server.
+        serverMessage || `Something went wrong (HTTP ${response.status}).`,
+        response.status,
+        payload.errors
+      )
     }
 
-    // A 200 with a populated `errors` array is a normal Kuroco failure mode.
-    if (Array.isArray(payload.errors) && payload.errors.length) {
-      throw new KurocoError('api', summariseErrors(payload.errors), response.status, payload.errors)
+    // 404 is the one case worth adding to rather than quoting: the gateway says
+    // only "[GW] API using this path does not exist", which names neither the
+    // path nor the structure the caller needs to go and create it on.
+    if (response.status === 404) {
+      throw new KurocoError(
+        'missing',
+        `No endpoint "${path}" on Kuroco API structure ${apiId}. It has to be created in the ` +
+          `admin UI (API > structure ${apiId} > add endpoint) before the app can call it.` +
+          (serverMessage ? ` Kuroco said: ${serverMessage}` : ''),
+        404,
+        payload.errors
+      )
+    }
+
+    if (serverMessage) {
+      throw new KurocoError('api', serverMessage, response.status, payload.errors)
+    }
+
+    if (!response.ok) {
+      throw new KurocoError('http', `Something went wrong (HTTP ${response.status}).`, response.status, payload)
     }
 
     return payload

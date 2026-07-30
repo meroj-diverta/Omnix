@@ -54,10 +54,116 @@ export function useAuth() {
     }
   }
 
+  // Step 1 of signup. Creates a provisional member and mails them a key —
+  // email_hash is that key, and it doubles as the OTP code the user types back
+  // in at step 2.
+  //
+  // The body structure the endpoint expects:
+  // {
+  //   "email": "your_mail_address@example.com",
+  //   "ext_info": {
+  //     "name1": "Diverta",
+  //     "name2": "Taro"
+  //   }
+  // }
+  async function getEmailOtp(email: string, name1: string, name2: string): Promise<boolean> {
+    isChecking.value = true
+    authError.value = null
+    try {
+      await request(routes.emailValidate, {
+        method: 'POST',
+        body: {
+          email,
+          ext_info: {
+            name1,
+            name2
+          }
+        }
+      })
+      return true
+    } catch (error) {
+      authError.value = describeFailure(error)
+      return false
+    } finally {
+      isChecking.value = false
+    }
+  }
+
+  // Step 2. Validates the email address from step 1 by sending back the OTP code
+  // (referenced here, and by the endpoint, as email_hash). Same endpoint as step
+  // 1 — a body carrying email_hash instead of email selects the verify branch,
+  // so sending email/ext_info as well would re-issue the invite and mint a new
+  // code instead of checking this one.
+  //
+  // The data structure the endpoint expects:
+  // {
+  //   "email_hash": "YOUR_EMAIL_HASH"
+  // }
+  async function verifyEmailWithOtp(email_hash: string): Promise<boolean> {
+    isChecking.value = true
+    authError.value = null
+    try {
+      await request(routes.emailValidate, {
+        method: 'POST',
+        body: { email_hash }
+      })
+      return true
+    } catch (error) {
+      authError.value = describeFailure(error)
+      return false
+    } finally {
+      isChecking.value = false
+    }
+  }
+
+  // Step 3. The data structure the register endpoint expects:
+  // {
+  //   "email": "your_mail_address@example.com",
+  //   "name1": "Diverta",
+  //   "name2": "Taro",
+  //   "login_pwd": "PASSWORD"
+  // }
+  async function signUp(
+    email: string,
+    password: string,
+    password_confirmed: string,
+    name1: string,
+    name2: string
+  ): Promise<boolean> {
+    // Checked before isChecking is raised: this one is ours, not the server's,
+    // because the two fields are never both sent.
+    if (password !== password_confirmed) {
+      authError.value = 'Your password and password confirmation field do not match.'
+      return false
+    }
+    isChecking.value = true
+    authError.value = null
+    try {
+      await request(routes.register, {
+        method: 'POST',
+        body: {
+          email,
+          name1,
+          name2,
+          login_pwd: password
+        }
+      })
+      return true
+    } catch (error) {
+      authError.value = describeFailure(error)
+      return false
+    } finally {
+      isChecking.value = false
+    }
+  }
+
   async function signIn(email: string, password: string): Promise<boolean> {
     isChecking.value = true
     authError.value = null
     try {
+      // The response is not saved: auth is cookie-based, so the browser stores
+      // the session itself and this call only needs to succeed. refresh() then
+      // fetches the profile and sets the shared state.
       await request(routes.login, {
         method: 'POST',
         body: { email, password }
@@ -69,12 +175,7 @@ export function useAuth() {
       return isSignedIn.value
     } catch (error) {
       member.value = null
-      authError.value =
-        error instanceof KurocoError
-          ? error.kind === 'auth'
-            ? 'Those credentials were not accepted.'
-            : error.message
-          : 'Sign-in failed.'
+      authError.value = describeFailure(error)
       return false
     } finally {
       isChecking.value = false
@@ -92,5 +193,31 @@ export function useAuth() {
     }
   }
 
-  return { member, isSignedIn, displayName, isChecking, authError, refresh, signIn, signOut }
+  return {
+    member,
+    isSignedIn,
+    displayName,
+    isChecking,
+    authError,
+    refresh,
+    getEmailOtp,
+    verifyEmailWithOtp,
+    signUp,
+    signIn,
+    signOut
+  }
+}
+
+/**
+ * What to show the user when a call fails.
+ *
+ * A KurocoError's message is Kuroco's own wording whenever the server sent one
+ * — passed through verbatim, never paraphrased and never replaced with a guess
+ * at the cause. If Kuroco's wording is unclear, unclear is what gets shown.
+ * Everything else gets a flatly generic line, so text written here is never
+ * mistaken for text from the server.
+ */
+function describeFailure(error: unknown): string {
+  if (error instanceof KurocoError) return error.message
+  return 'Something went wrong.'
 }
