@@ -40,7 +40,7 @@ Ordered by friction-yield per unit of effort. "Who": admin clicks (user) vs code
 
 | # | Feature | Concrete build in Omnix | Who | Status | What we expect to learn |
 |---|---|---|---|---|---|
-| 1 | **AI dictionary** | Dota jargon dictionary (BKB, CC, stacking, buyback) applied to chat | user | ☐ | Whether dictionaries beat prompt-stuffing for term expansion, and how type/priority actually resolve. Baseline measured: **"BKB" returns 0 hits today** |
+| 1 | **AI dictionary** | Dota jargon dictionary (BKB, CC, stacking, buyback) applied to chat | user | ☑ working — 44-row pilot loaded; proven query-time (F19). Deferred 67 risky rows, see O22 | Whether dictionaries beat prompt-stuffing for term expansion, and how type/priority actually resolve. Baseline measured: **"BKB" returns 0 hits today** |
 | 2 | **AI post-processing** | On note save: auto-summarise + auto-tag notes | user | ☐ | The happy path of the same feature that is *unreachable* from a crawl (F14) — does it behave when the save path is normal? |
 | 3 | **AI validation rules** | Reject empty/garbage notes *before* save | user | ☐ | Pre-save vs post-save split; what the rejection surfaces to an API caller |
 | 4 | **`ai_completion` in Smarty** | "Explain this term" custom-function endpoint | Claude writes, user pastes | ☐ | Model calls from inside Smarty; error/timeout behaviour when the model fails mid-template |
@@ -93,6 +93,22 @@ calls `7/notes/*`; only what sits behind those paths changes.
 - **O8** — Notes CRUD has never run end to end. `update`/`delete` take the id in
   the **path** (`useNotes.ts` fixed for this, unverified live); `remove()` also
   sends `topics_id` in the body — harmless, redundant.
+
+### Chat / retrieval config
+
+- **O22** — 🔶 `chat_contents_search` on api 7 searches **group 17 only** (proven:
+  every hit across four queries carried `topics_group_id: 17`; "Black King Bar"
+  returned 0). Items and builds live in group 12, reachable only via
+  `chat_supplementary_search`. **Add group 12 — and 20 once populated — to the api 7
+  endpoint's `topics_group_id`.** Until then Answer mode cannot discuss any item,
+  and most of the dictionary's item entries have nothing to match.
+- **O23** — Dictionary rows held back deliberately: `jargon_dict_kuroco_deferred.csv`
+  (67 rows) contains keys unsafe for naive substring replacement — `mid` would
+  corrupt "Midas", `AM` would corrupt "teamfight". Upload one (`AM`) on purpose as
+  a word-boundary test, then decide whether the rest need Regex mode.
+- **O24** — Replies can come from model knowledge when retrieval misses (F21). So
+  `eval/run_eval.py` must score the returned `list`, not the reply prose — check
+  whether it currently does before trusting any measurement from it.
 
 ### Chat modes
 

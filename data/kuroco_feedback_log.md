@@ -373,12 +373,114 @@ will look.
 
 ---
 
+## F19 — Docs never say where in the pipeline an AI dictionary applies
+
+**Status:** open · **Area:** AI dictionary, docs · **Severity:** medium
+
+`management/ai-dictionary.md` documents the fields (Slug, Enable, Type, Regex,
+Priority, Memo, CSV update) but never says **what the dictionary acts on**. A
+Replace-type dictionary could plausibly rewrite: the user's query before
+retrieval, the text sent to the embedding model at index time, the context handed
+to the completion model, or the generated answer. Each has completely different
+consequences, and the choice determines whether existing content must be
+re-vectorised for a new dictionary to take effect.
+
+**Determined empirically** on `OpenAI::chat_contents_search`, 2026-07-30 —
+it rewrites **the query, before retrieval**:
+
+| Query | Dictionary entry | Result |
+|---|---|---|
+| `Who is QoP?` | `QoP → Queen of Pain` | 7 hits, **top hit "Queen of Pain"** |
+| `Who is Queen of Pain?` | (control) | 10 hits, same top hit |
+
+"QoP" appears nowhere in the indexed content, so vector search could only have
+matched Queen of Pain if the query text had already been substituted. No
+re-vectorisation was performed, which also shows index-time content is not
+involved.
+
+**Suggestion:** state the application point on the AI dictionary page, and say
+explicitly whether existing vectorised content needs re-embedding after a
+dictionary change (from the above, it does not). One sentence would do.
+
+**Related, same page:** the docs list the CSV-update control but not the required
+CSV format. The format is only discoverable from an inline note on the upload
+widget itself — `search,replace,class`, with `class` restricted to
+Noun/Verb/Adjective/Adverb. That the class vocabulary is a part-of-speech set is
+a strong hint the feature is tokenizer-level rather than a glossary, which is
+worth saying out loud in the docs, since "AI dictionary" reads like the latter.
+
+---
+
+## F20 — AI dictionaries have no manual entry UI, and the CSV template 404s
+
+**Status:** open · **Area:** AI dictionary, admin UI · **Severity:** medium
+
+There is no way to add, edit or delete a single dictionary entry in the admin
+screen. CSV upload is the only input path. The screen's own **Download** control
+— the obvious way to obtain a correctly-shaped file — returns **"The requested
+page was not found."**
+
+So the only route in is a file format you cannot obtain from the tool that
+demands it. It was recoverable here only because the upload widget carries an
+inline note naming the headers.
+
+**Cost:** blocked outright until the inline note was spotted; a first attempt to
+enter terms by hand found no such affordance.
+
+**Suggestion:** fix the Download endpoint (a template with headers is enough when
+the dictionary is empty), and allow single-row add/edit — correcting one bad
+replacement should not require re-uploading the whole dictionary.
+
+---
+
+## F21 — `chat_contents_search` answers from model knowledge when retrieval misses
+
+**Status:** open · **Area:** AI / RAG · **Severity:** high (correctness)
+
+Observed 2026-07-30. The operation's behaviour splits on hit count:
+
+| Retrieval outcome | Behaviour |
+|---|---|
+| **0 hits** | Declines cleanly: *"I could not find any relevant content related to your question."* Confirmed with off-domain probes ("How do I bake sourdough bread?", "What is the capital of France?") and with an in-domain term absent from the corpus. |
+| **Hits present but irrelevant** | **Answers from the model's own knowledge**, and returns the unrelated retrieved rows as `list` — i.e. as citations. |
+
+Reproduction: `{"text":"Who is KotL?"}` returned 10 hits — **Kunkka, Slardar,
+Lich** — none of them Keeper of the Light. The reply nonetheless described Keeper
+of the Light (Ezalor) correctly and in detail. Correct answer, unsupported by any
+retrieved row, presented alongside citations to rows that do not contain it.
+
+**Why this matters beyond one wrong answer:**
+
+1. A fluent, confident answer carrying citations that do not support it is worse
+   than a refusal, particularly for a beginner-facing assistant that cannot judge
+   the answer.
+2. **Retrieval quality cannot be evaluated from replies.** Reply text stays good
+   while retrieval degrades, so any eval must score `list`, not prose. Anyone
+   tuning an embedding template by reading answers is flying blind.
+3. There is no configuration surface on this tier for "answer only from the
+   provided context" — no system prompt or persona field exists on the single-shot
+   AI operations, so an integrator cannot impose grounding themselves.
+
+**Suggestion:** either a per-endpoint strict-grounding parameter (answer only
+from retrieved context; refuse otherwise), or a `max_distance`-style relevance
+floor above which hits are discarded so the 0-hit refusal path takes over — plus
+a response field indicating whether the answer was grounded in the returned rows.
+
+---
+
 ## Reporting notes
 
 - F11 and F12 are already filed.
 - F2, F3, F4, F6, F10 are the highest-value cluster: all are
   *diagnosability* problems, and together they account for most of the time lost
   on this project. Worth reporting as a group with the timings from F4.
+- **F21 is the single most consequential finding so far** — it is a correctness
+  issue in the flagship RAG operation, not an ergonomics one, and it invalidates
+  the obvious way of evaluating retrieval. Report it on its own, with the KotL
+  reproduction, rather than bundled with the docs items.
+- F19 and F20 are both AI-dictionary items and belong in one report: the feature
+  works well (F19's finding is that it works and the docs omit how), but is hard
+  to populate (F20).
 - F14 and F13 pair up: the limitation plus the workaround that is also blocked.
 - F15 and F16 are security findings and should go through whatever channel
   Diverta uses for those rather than a public issue.

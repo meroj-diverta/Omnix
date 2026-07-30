@@ -1,0 +1,45 @@
+search,replace,class
+BKB,Black King Bar (BKB),Noun
+Aghs,Aghanim's Scepter,Noun
+Scepter,Aghanim's Scepter,Noun
+Vlads,Vladmir's Offering,Noun
+Euls,Eul's Scepter of Divinity,Noun
+Midas,Hand of Midas,Noun
+CC,crowd control (CC),Noun
+AoE,area of effect (AoE),Noun
+AOE,area of effect (AoE),Noun
+DPS,damage per second (DPS),Noun
+EHP,effective health pool (EHP),Noun
+GPM,gold per minute (GPM),Noun
+XPM,experience per minute (XPM),Noun
+last hit,last hitting creeps for gold,Verb
+stacking,stacking neutral creep camps,Noun
+gank,"ganking, a coordinated kill attempt on an enemy hero",Verb
+split push,"split pushing, pressuring a lane away from the enemy team",Verb
+buyback,"buyback, paying gold to respawn immediately",Noun
+Rosh,Roshan,Noun
+Aegis,Aegis of the Immortal,Noun
+smoke gank,smoke gank using Smoke of Deceit,Noun
+creep equilibrium,"creep equilibrium, where the lane creeps meet",Noun
+lane equilibrium,"creep equilibrium, where the lane creeps meet",Noun
+zoning,"zoning, denying the enemy access to experience range",Noun
+aggro,"creep aggro, drawing creep attacks",Noun
+high ground,"high ground, attacking into the enemy base uphill",Noun
+teamfight,team fight,Noun
+ratting,"ratting, winning by sneaking objectives",Noun
+pos 1,"position 1, the hard carry, safe lane",Noun
+pos1,"position 1, the hard carry, safe lane",Noun
+pos 2,"position 2, the mid laner",Noun
+pos2,"position 2, the mid laner",Noun
+pos 3,"position 3, the offlaner",Noun
+pos3,"position 3, the offlaner",Noun
+pos 4,"position 4, the roaming soft support",Noun
+pos4,"position 4, the roaming soft support",Noun
+pos 5,"position 5, the hard support",Noun
+pos5,"position 5, the hard support",Noun
+hard support,position 5 hard support,Noun
+soft support,position 4 soft support,Noun
+QoP,Queen of Pain,Noun
+KotL,Keeper of the Light,Noun
+squishy,"squishy, low health and easily killed",Adjective
+tanky,"tanky, high effective health",Adjective
