@@ -1,0 +1,100 @@
+**Describe the bug**
+
+. The write succeeds and the value is stored correctly — it displays correctly in the admin UI and is found by keyword search — but a subsequent read via adminMCP returns `[[""]]` instead of the stored options.
+
+This is a round-trip defect on the adminMCP surface, not data loss. The submitted values are persisted; only the read misreports them.
+
+Two controls establish the scope:
+
+1. A value written through the **admin UI** reads back correctly via adminMCP. So the adminMCP read path is not broken in general — only for values adminMCP itself wrote.
+2. A plain **Text** field included in the *same* adminMCP update request round-trips correctly. So the fault is specific to Multiple choice (checkbox) handling, not to adminMCP writes generally.
+
+**To Reproduce**
+
+Setup — content structure `mcp_readwrite_test` (`topics_group_id 22`) with two fields, no trailing whitespace in any option:
+
+- `cb_field` — Multiple choice (checkbox), options `alpha`, `beta`, `gamma`, `delta` (field column `ext_1`)
+- `text_control` — Text (field column `ext_2`)
+
+Content record `rw-test-1` (`topics_id 10618`), published.
+
+*Round 1 — baseline, written via the admin UI*
+
+1. In the admin UI, tick `alpha` and `beta` on `cb_field`, set `text_control` to `baseline`, save.
+2. Read via adminMCP `topics-fetch`:
+
+```json
+"ext_col_01": [["alpha","beta"]]
+"ext_col_02": ["baseline"]
+```
+
+The UI and the adminMCP read agree. Baseline is clean.
+
+*Round 2 — written via adminMCP*
+
+3. Call adminMCP `topics-update` with both fields in one request. Note the option values are deliberately disjoint from the baseline so the origin of any value is unambiguous:
+
+```json
+{"topics_id":10618,"topics_group_id":22,"ext_1":"gamma::delta","ext_2":"written-by-mcp"}
+```
+
+4. Response:
+
+```json
+{"errors":[],"messages":["Updated"],"status":"1"}
+```
+
+5. Read via adminMCP `topics-fetch`:
+
+```json
+"ext_col_01": [[""]]
+"ext_col_02": ["written-by-mcp"]
+```
+
+The checkbox field reads empty. The text field is correct.
+
+6. Hard-refresh the record in the admin UI. `cb_field` shows **gamma** and **delta** — the values submitted in step 3. `text_control` shows `written-by-mcp`.
+
+7. The stored value is also indexed. adminMCP `topics-list` with `topics_keyword=gamma` returns this record.
+
+So after step 3 the value is correctly written, correctly displayed, and searchable — but unreadable through the API that wrote it.
+
+**Expected behavior**
+
+A value written through adminMCP should be readable back through adminMCP. Write-then-read on the same surface should return the value that was written.
+
+Currently a caller that writes and then reads to confirm will see an empty field and may reasonably conclude the write failed — potentially re-writing, or treating the record as incomplete, when the data is in fact correct.
+
+**Screenshots**
+
+
+Content structure field settings: [url](https://diverta.gyazo.com/07ad1716c8d752c6cd650114c3df1d12)
+Manually selected option on admin UI: [url](https://diverta.gyazo.com/d96b620c961b9d0d019b5e343071a539)
+AdminMcp write and read request: [url](https://diverta.gyazo.com/8dbd8f2055903741a81d7b7decc5fa8c)
+Admin UI screen after AdminMcp call: [url](https://diverta.gyazo.com/0c95449995339447656b04e989d93ca3)
+
+Optional. The divergence is visible by comparing the admin UI edit screen for `topics_id 10618` (shows gamma, delta) against the adminMCP `topics-fetch` response for the same record (`[[""]]`) at the same point in time.
+
+**HAR**
+
+N/A.
+
+**Environment**
+
+- Target Website URL: https://meroj.g.kuroco.app
+- Affected surface: adminMCP gateway, `/direct/rcms_api/admin_mcp/x/all`
+- Content structure `topics_group_id 22`, field `ext_1` (`cb_field`), type Multiple choice (checkbox), `ext_type 5`, non-repeatable, `ext_group_loop 1`
+- Control field `ext_2` (`text_control`), type Text, same structure and same request
+- Also observed on `topics_group_id 21`, field `ext_1`, same field type
+
+**Additional context**
+
+The value returned by the failing read is `[[""]]` — an array containing an empty string. This is distinguishable from a genuinely unset field, which reads back as `[[]]`. So the read produces one empty element rather than reporting nothing.
+
+The double-colon sequence used in step 3 is the value of the internal constant `TopicsExtension::ARRAY_BOUNDARY`, defined at `nfs/lib/modules/topics/class/extension.php` line 11. Based on this test it appears to be an accepted write format for this path — the values it carries are stored correctly.
+
+Because UI-written values read back correctly while adminMCP-written values do not, the two paths appear to leave the field in different stored representations, with the adminMCP read able to interpret only one of them. Note that Kuroco supports a JSONB storage mode for extension values (`USE_TOPICS_EXT_JSONB`, referenced at `nfs/lib/modules/topics/config.php` line 90), and the checkbox extension class defines both a JSONB column accessor (`subLangColumnSingle()` returning `value_json`) and a JSONB escaping helper (`jsonbEscapeValueSingle()`) at `nfs/lib/modules/topics/class/extensions/05_5_multiple_choice_checkbox.php`. A mismatch between which representation the adminMCP write populates and which the adminMCP read consults would be consistent with the observed behaviour, though this has not been confirmed and is offered only as a starting point.
+
+Impact: any integration that writes a Multiple choice (checkbox) field through adminMCP and then reads it back — including read-after-write verification — will see an empty value despite a correct write. Data is not lost and remains correct in the UI and in keyword search.
+
+Not tested: Master (checkbox), `ext_type 37`; repeatable fields (`ext_group_loop` greater than 1); whether re-saving the record from the admin UI normalises the stored representation so that the adminMCP read becomes correct.

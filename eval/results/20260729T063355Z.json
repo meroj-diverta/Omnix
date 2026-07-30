@@ -1,0 +1,1296 @@
+{
+ "timestamp": "20260729T063355Z",
+ "passed": 25,
+ "total": 36,
+ "results": [
+  {
+   "id": "hero-basic-01",
+   "endpoint": "chat_contents_search",
+   "q": "What is Primal Beast's primary attribute?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.284,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "attribute"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.284,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "dist": 0.463,
+     "subject": "Beastmaster"
+    },
+    {
+     "group": 17,
+     "dist": 0.588,
+     "subject": "Abaddon"
+    },
+    {
+     "group": 17,
+     "dist": 0.605,
+     "subject": "Outworld Devourer"
+    },
+    {
+     "group": 17,
+     "dist": 0.617,
+     "subject": "Lycan"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-02",
+   "endpoint": "chat_contents_search",
+   "q": "Is Crystal Maiden melee or ranged?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.29,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "attack_type"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.29,
+     "subject": "Crystal Maiden"
+    },
+    {
+     "group": 17,
+     "dist": 0.575,
+     "subject": "Phantom Assassin"
+    },
+    {
+     "group": 17,
+     "dist": 0.58,
+     "subject": "Mirana"
+    },
+    {
+     "group": 17,
+     "dist": 0.59,
+     "subject": "Windranger"
+    },
+    {
+     "group": 17,
+     "dist": 0.592,
+     "subject": "Legion Commander"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-03",
+   "endpoint": "chat_contents_search",
+   "q": "What is Spectre's base armor and move speed?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.37,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.37,
+     "subject": "Spectre"
+    },
+    {
+     "group": 17,
+     "dist": 0.596,
+     "subject": "Sven"
+    },
+    {
+     "group": 17,
+     "dist": 0.612,
+     "subject": "Dazzle"
+    },
+    {
+     "group": 17,
+     "dist": 0.62,
+     "subject": "Venomancer"
+    },
+    {
+     "group": 17,
+     "dist": 0.623,
+     "subject": "Visage"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-04",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about the hero Pudge",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.276,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "overview"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.276,
+     "subject": "Pudge"
+    },
+    {
+     "group": 17,
+     "dist": 0.456,
+     "subject": "Puck"
+    },
+    {
+     "group": 17,
+     "dist": 0.469,
+     "subject": "Pugna"
+    },
+    {
+     "group": 17,
+     "dist": 0.574,
+     "subject": "Pangolier"
+    },
+    {
+     "group": 17,
+     "dist": 0.589,
+     "subject": "Juggernaut"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-05",
+   "endpoint": "chat_contents_search",
+   "q": "How much strength does Centaur Warrunner gain per level?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.29,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "growth"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.29,
+     "subject": "Centaur Warrunner"
+    },
+    {
+     "group": 17,
+     "dist": 0.586,
+     "subject": "Warlock"
+    },
+    {
+     "group": 17,
+     "dist": 0.608,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "dist": 0.61,
+     "subject": "Batrider"
+    },
+    {
+     "group": 17,
+     "dist": 0.612,
+     "subject": "Winter Wyvern"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-06",
+   "endpoint": "chat_contents_search",
+   "q": "What is Medusa's attack range?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.378,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.378,
+     "subject": "Medusa"
+    },
+    {
+     "group": 17,
+     "dist": 0.613,
+     "subject": "Naga Siren"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-07",
+   "endpoint": "chat_contents_search",
+   "q": "Which roles does Legion Commander play?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.29,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "roles"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.29,
+     "subject": "Legion Commander"
+    },
+    {
+     "group": 17,
+     "dist": 0.566,
+     "subject": "Lich"
+    },
+    {
+     "group": 17,
+     "dist": 0.573,
+     "subject": "Venomancer"
+    },
+    {
+     "group": 17,
+     "dist": 0.588,
+     "subject": "Luna"
+    },
+    {
+     "group": 17,
+     "dist": 0.589,
+     "subject": "Lone Druid"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-08",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Kez",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.46,
+   "max_distance": 0.5,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "recent"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.46,
+     "subject": "Kez"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-09",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about the hero Largo",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.358,
+   "max_distance": 0.5,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "recent"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.358,
+     "subject": "Largo"
+    },
+    {
+     "group": 17,
+     "dist": 0.63,
+     "subject": "Lifestealer"
+    }
+   ]
+  },
+  {
+   "id": "hero-basic-10",
+   "endpoint": "chat_contents_search",
+   "q": "What is Ogre Magi's base health regeneration?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.35,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.35,
+     "subject": "Ogre Magi"
+    },
+    {
+     "group": 17,
+     "dist": 0.546,
+     "subject": "Medusa"
+    },
+    {
+     "group": 17,
+     "dist": 0.567,
+     "subject": "Enigma"
+    },
+    {
+     "group": 17,
+     "dist": 0.578,
+     "subject": "Magnus"
+    },
+    {
+     "group": 17,
+     "dist": 0.582,
+     "subject": "Io"
+    }
+   ]
+  },
+  {
+   "id": "hero-ambig-01",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Primal Beast",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.302,
+   "max_distance": 0.45,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "regression",
+    "cosmetic-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.302,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "dist": 0.499,
+     "subject": "Beastmaster"
+    },
+    {
+     "group": 17,
+     "dist": 0.636,
+     "subject": "Abaddon"
+    }
+   ]
+  },
+  {
+   "id": "hero-ambig-02",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Monkey King",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.358,
+   "max_distance": 0.5,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "cosmetic-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.358,
+     "subject": "Monkey King"
+    }
+   ]
+  },
+  {
+   "id": "hero-ambig-03",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Dawnbreaker",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.364,
+   "max_distance": 0.5,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "cosmetic-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.364,
+     "subject": "Dawnbreaker"
+    }
+   ]
+  },
+  {
+   "id": "hero-ambig-04",
+   "endpoint": "chat_contents_search",
+   "q": "What kind of hero is Void Spirit?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.238,
+   "max_distance": 0.5,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "name-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.238,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.388,
+     "subject": "Faceless Void"
+    },
+    {
+     "group": 17,
+     "dist": 0.45,
+     "subject": "Vengeful Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.47,
+     "subject": "Storm Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.472,
+     "subject": "Spirit Breaker"
+    }
+   ]
+  },
+  {
+   "id": "hero-ambig-05",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Earth Spirit",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.308,
+   "max_distance": 0.5,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "name-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.308,
+     "subject": "Earth Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.443,
+     "subject": "Earthshaker"
+    },
+    {
+     "group": 17,
+     "dist": 0.493,
+     "subject": "Storm Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.52,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.535,
+     "subject": "Ember Spirit"
+    }
+   ]
+  },
+  {
+   "id": "hero-compare-01",
+   "endpoint": "chat_contents_search",
+   "q": "Which hero has higher base strength, Pudge or Tiny?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.35,
+   "max_distance": 0.55,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "comparison"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.35,
+     "subject": "Pudge"
+    },
+    {
+     "group": 17,
+     "dist": 0.446,
+     "subject": "Tiny"
+    },
+    {
+     "group": 17,
+     "dist": 0.485,
+     "subject": "Puck"
+    },
+    {
+     "group": 17,
+     "dist": 0.496,
+     "subject": "Pugna"
+    },
+    {
+     "group": 17,
+     "dist": 0.572,
+     "subject": "Bristleback"
+    }
+   ]
+  },
+  {
+   "id": "hero-compare-02",
+   "endpoint": "chat_contents_search",
+   "q": "Name some Universal attribute heroes",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.502,
+   "max_distance": 0.55,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "aggregate"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.502,
+     "subject": "Enigma"
+    },
+    {
+     "group": 17,
+     "dist": 0.51,
+     "subject": "Bane"
+    },
+    {
+     "group": 17,
+     "dist": 0.52,
+     "subject": "Marci"
+    },
+    {
+     "group": 17,
+     "dist": 0.52,
+     "subject": "Batrider"
+    },
+    {
+     "group": 17,
+     "dist": 0.521,
+     "subject": "Magnus"
+    }
+   ]
+  },
+  {
+   "id": "hero-compare-03",
+   "endpoint": "chat_contents_search",
+   "q": "Which heroes are ranged supports?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.515,
+   "max_distance": 0.55,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "aggregate"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.515,
+     "subject": "Windranger"
+    },
+    {
+     "group": 17,
+     "dist": 0.52,
+     "subject": "Silencer"
+    },
+    {
+     "group": 17,
+     "dist": 0.526,
+     "subject": "Venomancer"
+    },
+    {
+     "group": 17,
+     "dist": 0.536,
+     "subject": "Drow Ranger"
+    },
+    {
+     "group": 17,
+     "dist": 0.541,
+     "subject": "Rubick"
+    }
+   ]
+  },
+  {
+   "id": "hero-compare-04",
+   "endpoint": "chat_contents_search",
+   "q": "What are the tankiest strength heroes?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.547,
+   "max_distance": 0.55,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "hero",
+    "aggregate"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.547,
+     "subject": "Elder Titan"
+    },
+    {
+     "group": 17,
+     "dist": 0.559,
+     "subject": "Centaur Warrunner"
+    },
+    {
+     "group": 17,
+     "dist": 0.568,
+     "subject": "Bristleback"
+    },
+    {
+     "group": 17,
+     "dist": 0.569,
+     "subject": "Legion Commander"
+    },
+    {
+     "group": 17,
+     "dist": 0.569,
+     "subject": "Undying"
+    }
+   ]
+  },
+  {
+   "id": "hero-compare-05",
+   "endpoint": "chat_contents_search",
+   "q": "Which heroes have the highest win rate in public games?",
+   "kind": "positive",
+   "expect_group": 17,
+   "top_group": 17,
+   "best_distance": 0.568,
+   "max_distance": 0.55,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "hero",
+    "aggregate",
+    "popularity"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.568,
+     "subject": "Windranger"
+    },
+    {
+     "group": 17,
+     "dist": 0.579,
+     "subject": "Enigma"
+    },
+    {
+     "group": 17,
+     "dist": 0.58,
+     "subject": "Chen"
+    },
+    {
+     "group": 17,
+     "dist": 0.581,
+     "subject": "Phoenix"
+    },
+    {
+     "group": 17,
+     "dist": 0.582,
+     "subject": "Visage"
+    }
+   ]
+  },
+  {
+   "id": "lang-01",
+   "endpoint": "chat_contents_search",
+   "q": "Explain what a carry does in simple English",
+   "kind": "negative",
+   "expect_group": null,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.45,
+   "top_group_match": null,
+   "any_group_match": null,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "language",
+    "known-gap"
+   ],
+   "got": []
+  },
+  {
+   "id": "jargon-01",
+   "endpoint": "chat_contents_search",
+   "q": "What does BKB mean?",
+   "kind": "positive",
+   "expect_group": 20,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": []
+  },
+  {
+   "id": "jargon-02",
+   "endpoint": "chat_contents_search",
+   "q": "What does CC mean in Dota?",
+   "kind": "positive",
+   "expect_group": 20,
+   "top_group": 17,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.631,
+     "subject": "Clinkz"
+    }
+   ]
+  },
+  {
+   "id": "jargon-03",
+   "endpoint": "chat_contents_search",
+   "q": "What is stacking and why do players do it?",
+   "kind": "positive",
+   "expect_group": 20,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": []
+  },
+  {
+   "id": "jargon-04",
+   "endpoint": "chat_contents_search",
+   "q": "What is buyback?",
+   "kind": "positive",
+   "expect_group": 20,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": []
+  },
+  {
+   "id": "ability-01",
+   "endpoint": "chat_contents_search",
+   "q": "What does Chronosphere do?",
+   "kind": "positive",
+   "expect_group": 18,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "ability",
+    "empty-source"
+   ],
+   "got": []
+  },
+  {
+   "id": "ability-02",
+   "endpoint": "chat_contents_search",
+   "q": "How long is Black Hole's cooldown?",
+   "kind": "positive",
+   "expect_group": 18,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "ability",
+    "empty-source"
+   ],
+   "got": []
+  },
+  {
+   "id": "ability-03",
+   "endpoint": "chat_contents_search",
+   "q": "What is the mana cost of Laguna Blade?",
+   "kind": "positive",
+   "expect_group": 18,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "ability",
+    "empty-source"
+   ],
+   "got": []
+  },
+  {
+   "id": "lore-01",
+   "endpoint": "chat_contents_search",
+   "q": "What is the backstory of Faceless Void?",
+   "kind": "positive",
+   "expect_group": 19,
+   "top_group": 17,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "lore",
+    "empty-source"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.342,
+     "subject": "Faceless Void"
+    },
+    {
+     "group": 17,
+     "dist": 0.492,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.557,
+     "subject": "Visage"
+    },
+    {
+     "group": 17,
+     "dist": 0.618,
+     "subject": "Vengeful Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.628,
+     "subject": "Shadow Fiend"
+    }
+   ]
+  },
+  {
+   "id": "lore-02",
+   "endpoint": "chat_contents_search",
+   "q": "Who is Invoker in the lore?",
+   "kind": "positive",
+   "expect_group": 19,
+   "top_group": 17,
+   "best_distance": null,
+   "max_distance": 0.5,
+   "top_group_match": false,
+   "any_group_match": false,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "lore",
+    "empty-source"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.363,
+     "subject": "Invoker"
+    },
+    {
+     "group": 17,
+     "dist": 0.603,
+     "subject": "Vengeful Spirit"
+    },
+    {
+     "group": 17,
+     "dist": 0.605,
+     "subject": "Viper"
+    },
+    {
+     "group": 17,
+     "dist": 0.609,
+     "subject": "Witch Doctor"
+    },
+    {
+     "group": 17,
+     "dist": 0.615,
+     "subject": "Warlock"
+    }
+   ]
+  },
+  {
+   "id": "neg-01",
+   "endpoint": "chat_contents_search",
+   "q": "What item build should I use on Huskar mid?",
+   "kind": "negative",
+   "expect_group": null,
+   "top_group": 17,
+   "best_distance": 0.366,
+   "max_distance": 0.45,
+   "top_group_match": null,
+   "any_group_match": null,
+   "distance_ok": false,
+   "passed": false,
+   "tags": [
+    "negative",
+    "routing"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.366,
+     "subject": "Huskar"
+    },
+    {
+     "group": 17,
+     "dist": 0.548,
+     "subject": "Tusk"
+    },
+    {
+     "group": 17,
+     "dist": 0.571,
+     "subject": "Bristleback"
+    },
+    {
+     "group": 17,
+     "dist": 0.583,
+     "subject": "Tidehunter"
+    },
+    {
+     "group": 17,
+     "dist": 0.584,
+     "subject": "Slark"
+    }
+   ]
+  },
+  {
+   "id": "neg-02",
+   "endpoint": "chat_contents_search",
+   "q": "What is the current pro meta for offlane?",
+   "kind": "negative",
+   "expect_group": null,
+   "top_group": 17,
+   "best_distance": 0.592,
+   "max_distance": 0.45,
+   "top_group_match": null,
+   "any_group_match": null,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "negative",
+    "routing"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "dist": 0.592,
+     "subject": "Nature's Prophet"
+    },
+    {
+     "group": 17,
+     "dist": 0.621,
+     "subject": "Death Prophet"
+    },
+    {
+     "group": 17,
+     "dist": 0.623,
+     "subject": "Pangolier"
+    },
+    {
+     "group": 17,
+     "dist": 0.634,
+     "subject": "Broodmother"
+    }
+   ]
+  },
+  {
+   "id": "neg-03",
+   "endpoint": "chat_contents_search",
+   "q": "How do I improve my last hitting?",
+   "kind": "negative",
+   "expect_group": null,
+   "top_group": null,
+   "best_distance": null,
+   "max_distance": 0.45,
+   "top_group_match": null,
+   "any_group_match": null,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "negative",
+    "routing"
+   ],
+   "got": []
+  },
+  {
+   "id": "supp-01",
+   "endpoint": "chat_supplementary_search",
+   "q": "What item build should I use on Huskar mid?",
+   "kind": "positive",
+   "expect_group": 12,
+   "top_group": 12,
+   "best_distance": 0.517,
+   "max_distance": 0.6,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "supplementary",
+    "build"
+   ],
+   "got": [
+    {
+     "group": 12,
+     "dist": 0.517,
+     "subject": "Kunkka Build Guide DOTA 2: &quot;Bootylicious&quot; - A guid"
+    },
+    {
+     "group": 12,
+     "dist": 0.536,
+     "subject": "Magnus Build Guide DOTA 2: Magnus - Utility Initiator (with "
+    },
+    {
+     "group": 12,
+     "dist": 0.544,
+     "subject": "Lina Build Guide DOTA 2: Oracion Mid Lina build 6.84"
+    },
+    {
+     "group": 12,
+     "dist": 0.544,
+     "subject": "Crystal Maiden Build Guide DOTA 2: Over 200 hours of Crystal"
+    },
+    {
+     "group": 12,
+     "dist": 0.552,
+     "subject": "Nature&#x27;s Prophet Build Guide DOTA 2: 6.82 Nature&#x27;s"
+    }
+   ]
+  },
+  {
+   "id": "supp-02",
+   "endpoint": "chat_supplementary_search",
+   "q": "Give me a Legion Commander build guide",
+   "kind": "positive",
+   "expect_group": 12,
+   "top_group": 12,
+   "best_distance": 0.256,
+   "max_distance": 0.6,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "supplementary",
+    "build"
+   ],
+   "got": [
+    {
+     "group": 12,
+     "dist": 0.256,
+     "subject": "Legion Commander Build Guide DOTA 2: Balanced Commander(work"
+    },
+    {
+     "group": 12,
+     "dist": 0.271,
+     "subject": "Legion Commander Build Guide DOTA 2: [Cj.CaptainJack].Legion"
+    },
+    {
+     "group": 12,
+     "dist": 0.303,
+     "subject": "Legion Commander Build Guide DOTA 2: Legion Commander Jungle"
+    },
+    {
+     "group": 12,
+     "dist": 0.456,
+     "subject": "Lich Build Guide DOTA 2: Lich King"
+    },
+    {
+     "group": 12,
+     "dist": 0.458,
+     "subject": "Io Build Guide DOTA 2: Omega MVP IO PRO GUIDE"
+    }
+   ]
+  },
+  {
+   "id": "supp-03",
+   "endpoint": "chat_supplementary_search",
+   "q": "Beginner tips for playing support",
+   "kind": "positive",
+   "expect_group": 12,
+   "top_group": 12,
+   "best_distance": 0.462,
+   "max_distance": 0.6,
+   "top_group_match": true,
+   "any_group_match": true,
+   "distance_ok": true,
+   "passed": true,
+   "tags": [
+    "supplementary",
+    "beginner"
+   ],
+   "got": [
+    {
+     "group": 12,
+     "dist": 0.462,
+     "subject": "Templar Assassin Build Guide DOTA 2: Templar Assassin - The "
+    },
+    {
+     "group": 12,
+     "dist": 0.475,
+     "subject": "Sven Build Guide DOTA 2: Unusual Support: Sven"
+    },
+    {
+     "group": 12,
+     "dist": 0.494,
+     "subject": "Tusk Build Guide DOTA 2: Tuskarr can support!!"
+    },
+    {
+     "group": 12,
+     "dist": 0.519,
+     "subject": "Drow Ranger Build Guide DOTA 2: Drow Ranger - Team Carry"
+    },
+    {
+     "group": 12,
+     "dist": 0.527,
+     "subject": "Bane Build Guide DOTA 2: Darkestsabata&#x27;s elemental of b"
+    }
+   ]
+  }
+ ]
+}

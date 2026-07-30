@@ -1,24 +1,9 @@
 import type { ChatMessage, OmnixResponse } from '~/types/chat'
-
-const MOCK_ANSWERS = [
-  '"BKB" is short for Black King Bar — an item that makes you immune to most magic and disables for a few seconds. Think of it as a panic button for surviving a gank.',
-  '"CC" means crowd control — anything that stuns, roots, slows, or silences a hero so they can\'t act freely. If you hear "he has no CC," it means the enemy can\'t lock you down.',
-  'Faceless Void is a Radiant hero who bends time itself. His ultimate, Chronosphere, freezes everyone inside a bubble except him — a great tool for picking off an entire enemy team at once.',
-  '"Stacking" means pulling a jungle camp to another spot right before it respawns, so an extra set of creeps spawns there for later — a classic trick for earning bonus gold.',
-  '"Buyback" lets you pay gold to respawn instantly after dying, instead of waiting out the timer — useful for stopping the enemy from destroying your base while your team is down a player.'
-]
-
-let mockId = 0
-function nextMockAnswer(query: string): OmnixResponse {
-  const answer = MOCK_ANSWERS[mockId % MOCK_ANSWERS.length]
-  mockId += 1
-  return {
-    answer: `${answer}\n\n(This is a placeholder answer — the real Kuroco/RAG endpoint hasn't been wired up yet for: "${query}")`
-  }
-}
+import type { KurocoChatResponse } from '~/types/kuroco'
+import { KurocoError } from '~/types/kuroco'
 
 export function useOmnix() {
-  const config = useRuntimeConfig()
+  const { request, apiIds, endpoints, decodeEntities } = useKuroco()
 
   const messages = useState<ChatMessage[]>('omnix-messages', () => [])
   const isLoading = useState('omnix-loading', () => false)
@@ -31,37 +16,87 @@ export function useOmnix() {
     })
   }
 
+  function toOmnixResponse(res: KurocoChatResponse): OmnixResponse {
+    const hits = res.list ?? []
+    return {
+      answer: res.reply || res.messages?.[0] || '',
+      sources: hits
+        .filter((h) => h.subject || h.slug)
+        .map((h) => ({ subject: decodeEntities(String(h.subject ?? '')), slug: String(h.slug ?? '') })),
+      images: hits
+        .filter((h) => h.image)
+        .map((h) => ({ url: String(h.image), alt: decodeEntities(String(h.subject ?? '')) }))
+    }
+  }
+
   async function ask(query: string) {
     const trimmed = query.trim()
     if (!trimmed || isLoading.value) return
 
     pushMessage({ role: 'user', text: trimmed })
+
+    // No sign-in gate: verified 2026-07-29 that a cookie-mode API structure
+    // answers unauthenticated requests unless the endpoint itself carries an
+    // `auth` restriction, and the chat endpoints deliberately carry none. Only
+    // the notes endpoints require a member.
+    //
+    // Nothing is faked here either. Canned replies used to stand in when
+    // unconfigured, which made a broken setup look like a working product — the
+    // worst failure mode for a tool whose entire job is being trusted on facts.
     isLoading.value = true
-
     try {
-      let response: OmnixResponse
+      const res = await request<KurocoChatResponse>(endpoints.chat, {
+        apiId: apiIds.chat,
+        method: 'POST',
+        body: { text: trimmed }
+      })
+      const response = toOmnixResponse(res)
 
-      if (config.public.omnixConfigured) {
-        response = await $fetch<OmnixResponse>('/api/omnix', {
-          method: 'POST',
-          body: { text: trimmed }
+      if (!response.answer) {
+        // A 200 with an empty reply is a real outcome: retrieval found nothing,
+        // or the model returned nothing. Report it as such — do not paper over it.
+        pushMessage({
+          role: 'omnix',
+          text: 'Kuroco answered, but returned no text for that question. There may be nothing in the indexed content that matches it.',
+          sources: response.sources,
+          isError: true
         })
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 700))
-        response = nextMockAnswer(trimmed)
+        return
       }
 
-      pushMessage({ role: 'omnix', text: response.answer, images: response.images, sources: response.sources })
-    } catch {
       pushMessage({
         role: 'omnix',
-        text: 'The Ancients are silent... the connection to Omnix failed. Try again.',
-        isError: true
+        text: response.answer,
+        images: response.images,
+        sources: response.sources
       })
+    } catch (error) {
+      // Name the failing layer. A catch-all "connection failed" cost real
+      // debugging time, because from inside the browser a blocked CORS preflight
+      // is indistinguishable from an unreachable host.
+      pushMessage({ role: 'omnix', text: explain(error), isError: true })
     } finally {
       isLoading.value = false
     }
   }
 
   return { messages, isLoading, ask }
+}
+
+function explain(error: unknown): string {
+  if (error instanceof KurocoError) {
+    switch (error.kind) {
+      case 'network':
+        return `Omnix could not reach Kuroco. ${error.message}`
+      case 'auth':
+        return 'Your Kuroco session was rejected or has expired. Sign in again from the panel on the right.'
+      case 'missing':
+        return `Omnix is pointed at an endpoint that does not exist yet. ${error.message}`
+      case 'api':
+        return `Kuroco rejected the question: ${error.message}`
+      default:
+        return `Kuroco returned an error${error.status ? ` (HTTP ${error.status})` : ''}. ${error.message}`
+    }
+  }
+  return `Something unexpected went wrong: ${error instanceof Error ? error.message : String(error)}`
 }

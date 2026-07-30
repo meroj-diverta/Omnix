@@ -1,0 +1,115 @@
+search,replace,class
+BKB,Black King Bar (BKB),item
+bkb,Black King Bar (BKB),item
+Blink,Blink Dagger,item
+Aghs,Aghanim's Scepter,item
+Scepter,Aghanim's Scepter,item
+Shard,Aghanim's Shard,item
+Butterfly,Butterfly,item
+Hex,Scythe of Vyse (Hex),item
+Sheep,Scythe of Vyse (Hex),item
+Manta,Manta Style,item
+Vlads,Vladmir's Offering,item
+Meka,Mekansm,item
+Pipe,Pipe of Insight,item
+Force,Force Staff,item
+Glimmer,Glimmer Cape,item
+Euls,Eul's Scepter of Divinity,item
+Orchid,Orchid Malevolence,item
+Bloodthorn,Bloodthorn,item
+Satanic,Satanic,item
+Heart,Heart of Tarrasque,item
+Radiance,Radiance,item
+Midas,Hand of Midas,item
+Travels,Boots of Travel,item
+Phase,Phase Boots,item
+Treads,Power Treads,item
+Arcanes,Arcane Boots,item
+Tranquils,Tranquil Boots,item
+Wand,Magic Wand,item
+Stick,Magic Stick,item
+Dust,Dust of Appearance,item
+Sentry,Sentry Ward,item
+Obs,Observer Ward,item
+Smoke,Smoke of Deceit,item
+TP,Town Portal Scroll (TP),item
+tp,Town Portal Scroll (TP),item
+CC,crowd control (CC),concept
+AoE,area of effect (AoE),concept
+AOE,area of effect (AoE),concept
+DPS,damage per second (DPS),concept
+EHP,effective health pool (EHP),concept
+GPM,gold per minute (GPM),concept
+XPM,experience per minute (XPM),concept
+CS,"creep score, last hitting (CS)",concept
+last hit,last hitting creeps for gold,concept
+deny,denying creeps to starve the enemy of experience,concept
+stacking,stacking neutral creep camps,concept
+pull,pulling the lane creeps into a neutral camp,concept
+gank,"ganking, a coordinated kill attempt on an enemy hero",concept
+roam,roaming between lanes to find kills,concept
+split push,"split pushing, pressuring a lane away from the enemy team",concept
+buyback,"buyback, paying gold to respawn immediately",concept
+Rosh,Roshan,concept
+Roshan,Roshan,concept
+Aegis,Aegis of the Immortal,concept
+smoke gank,smoke gank using Smoke of Deceit,concept
+creep equilibrium,"creep equilibrium, where the lane creeps meet",concept
+lane equilibrium,"creep equilibrium, where the lane creeps meet",concept
+zoning,"zoning, denying the enemy access to experience range",concept
+aggro,"creep aggro, drawing creep attacks",concept
+high ground,"high ground, attacking into the enemy base uphill",concept
+teamfight,team fight,concept
+initiate,initiating a team fight,concept
+kite,"kiting, attacking while retreating",concept
+farm,farming gold and experience,concept
+push,pushing a lane toward enemy towers,concept
+dive,tower diving,concept
+ratting,"ratting, winning by sneaking objectives",concept
+turbo,Turbo game mode,concept
+meta,the current metagame,concept
+pos 1,"position 1, the hard carry, safe lane",role
+pos1,"position 1, the hard carry, safe lane",role
+pos 2,"position 2, the mid laner",role
+pos2,"position 2, the mid laner",role
+pos 3,"position 3, the offlaner",role
+pos3,"position 3, the offlaner",role
+pos 4,"position 4, the roaming soft support",role
+pos4,"position 4, the roaming soft support",role
+pos 5,"position 5, the hard support",role
+pos5,"position 5, the hard support",role
+safelane,safe lane,role
+offlane,off lane,role
+mid,mid lane,role
+hard support,position 5 hard support,role
+soft support,position 4 soft support,role
+AM,Anti-Mage,hero
+PA,Phantom Assassin,hero
+PL,Phantom Lancer,hero
+SF,Shadow Fiend,hero
+QoP,Queen of Pain,hero
+TA,Templar Assassin,hero
+CM,Crystal Maiden,hero
+WD,Witch Doctor,hero
+SK,Sand King,hero
+WK,Wraith King,hero
+DK,Dragon Knight,hero
+LC,Legion Commander,hero
+CK,Chaos Knight,hero
+AA,Ancient Apparition,hero
+KotL,Keeper of the Light,hero
+NP,Nature's Prophet,hero
+OD,Outworld Devourer,hero
+TB,Terrorblade,hero
+BH,Bounty Hunter,hero
+BS,Bloodseeker,hero
+ES,Earthshaker,hero
+SD,Shadow Demon,hero
+SS,Shadow Shaman,hero
+MK,Monkey King,hero
+Void,Faceless Void,hero
+Furion,Nature's Prophet,hero
+Necro,Necrophos,hero
+Magina,Anti-Mage,hero
+Yurnero,Juggernaut,hero
+Jugg,Juggernaut,hero

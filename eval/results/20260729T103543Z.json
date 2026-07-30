@@ -1,0 +1,1447 @@
+{
+ "timestamp": "20260729T103543Z",
+ "passed": 13,
+ "total": 45,
+ "results": [
+  {
+   "id": "hero-basic-01",
+   "endpoint": "chat_contents_search",
+   "q": "What is Primal Beast's primary attribute?",
+   "expect_group": 17,
+   "expect_slug": [
+    "primal-beast"
+   ],
+   "top_group": 17,
+   "top_slug": "primal-beast",
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "attribute"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.301,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "slug": "kez",
+     "dist": 0.582,
+     "subject": "Kez"
+    },
+    {
+     "group": 17,
+     "slug": "mars",
+     "dist": 0.603,
+     "subject": "Mars"
+    },
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.616,
+     "subject": "Dawnbreaker"
+    },
+    {
+     "group": 17,
+     "slug": "snapfire",
+     "dist": 0.621,
+     "subject": "Snapfire"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": 0.301,
+   "top_slug_match": true,
+   "any_slug_match": true,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "hero-basic-02",
+   "endpoint": "chat_contents_search",
+   "q": "Is Crystal Maiden melee or ranged?",
+   "expect_group": 17,
+   "expect_slug": [
+    "crystal-maiden"
+   ],
+   "top_group": 17,
+   "top_slug": "marci",
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "attack_type"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "marci",
+     "dist": 0.609,
+     "subject": "Marci"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-03",
+   "endpoint": "chat_contents_search",
+   "q": "What is Spectre's base armor and move speed?",
+   "expect_group": 17,
+   "expect_slug": [
+    "spectre"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-04",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about the hero Pudge",
+   "expect_group": 17,
+   "expect_slug": [
+    "pudge"
+   ],
+   "top_group": 17,
+   "top_slug": "largo",
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "overview"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "largo",
+     "dist": 0.633,
+     "subject": "Largo"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-05",
+   "endpoint": "chat_contents_search",
+   "q": "How much strength does Centaur Warrunner gain per level?",
+   "expect_group": 17,
+   "expect_slug": [
+    "centaur"
+   ],
+   "top_group": 17,
+   "top_slug": "mars",
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "growth"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "mars",
+     "dist": 0.602,
+     "subject": "Mars"
+    },
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.636,
+     "subject": "Primal Beast"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-06",
+   "endpoint": "chat_contents_search",
+   "q": "What is Medusa's attack range?",
+   "expect_group": 17,
+   "expect_slug": [
+    "medusa"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-07",
+   "endpoint": "chat_contents_search",
+   "q": "Which roles does Legion Commander play?",
+   "expect_group": 17,
+   "expect_slug": [
+    "legion-commander"
+   ],
+   "top_group": 17,
+   "top_slug": "marci",
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "roles"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "marci",
+     "dist": 0.605,
+     "subject": "Marci"
+    },
+    {
+     "group": 17,
+     "slug": "largo",
+     "dist": 0.638,
+     "subject": "Largo"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-08",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Kez",
+   "expect_group": 17,
+   "expect_slug": [
+    "kez"
+   ],
+   "top_group": 17,
+   "top_slug": "kez",
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "recent"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "kez",
+     "dist": 0.535,
+     "subject": "Kez"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": 0.535,
+   "top_slug_match": true,
+   "any_slug_match": true,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-basic-09",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about the hero Largo",
+   "expect_group": 17,
+   "expect_slug": [
+    "largo"
+   ],
+   "top_group": 17,
+   "top_slug": "largo",
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "recent"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "largo",
+     "dist": 0.399,
+     "subject": "Largo"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": 0.399,
+   "top_slug_match": true,
+   "any_slug_match": true,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "hero-basic-10",
+   "endpoint": "chat_contents_search",
+   "q": "What is Ogre Magi's health regeneration?",
+   "expect_group": 17,
+   "expect_slug": [
+    "ogre-magi"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-ambig-01",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Primal Beast",
+   "expect_group": 17,
+   "expect_slug": [
+    "primal-beast"
+   ],
+   "top_group": 17,
+   "top_slug": "primal-beast",
+   "max_distance": 0.45,
+   "tags": [
+    "hero",
+    "regression",
+    "cosmetic-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.275,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "slug": "kez",
+     "dist": 0.599,
+     "subject": "Kez"
+    },
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.64,
+     "subject": "Dawnbreaker"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": 0.275,
+   "top_slug_match": true,
+   "any_slug_match": true,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "hero-ambig-02",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Monkey King",
+   "expect_group": 17,
+   "expect_slug": [
+    "monkey-king"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "cosmetic-collision"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-ambig-03",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Dawnbreaker",
+   "expect_group": 17,
+   "expect_slug": [
+    "dawnbreaker"
+   ],
+   "top_group": 17,
+   "top_slug": "dawnbreaker",
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "cosmetic-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.381,
+     "subject": "Dawnbreaker"
+    },
+    {
+     "group": 17,
+     "slug": "hoodwink",
+     "dist": 0.608,
+     "subject": "Hoodwink"
+    },
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.63,
+     "subject": "Primal Beast"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": 0.381,
+   "top_slug_match": true,
+   "any_slug_match": true,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "hero-ambig-04",
+   "endpoint": "chat_contents_search",
+   "q": "What kind of hero is Void Spirit?",
+   "expect_group": 17,
+   "expect_slug": [
+    "void-spirit"
+   ],
+   "top_group": 17,
+   "top_slug": "void-spirit",
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "name-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.275,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "slug": "mars",
+     "dist": 0.61,
+     "subject": "Mars"
+    },
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.626,
+     "subject": "Dawnbreaker"
+    },
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.628,
+     "subject": "Primal Beast"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": 0.275,
+   "top_slug_match": true,
+   "any_slug_match": true,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "hero-ambig-05",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me about Earth Spirit",
+   "expect_group": 17,
+   "expect_slug": [
+    "earth-spirit"
+   ],
+   "top_group": 17,
+   "top_slug": "void-spirit",
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "name-collision"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.526,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "slug": "mars",
+     "dist": 0.633,
+     "subject": "Mars"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-compare-01",
+   "endpoint": "chat_contents_search",
+   "q": "Which hero has higher base strength, Pudge or Tiny?",
+   "expect_group": 17,
+   "expect_slug": [
+    "pudge",
+    "tiny"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.55,
+   "tags": [
+    "hero",
+    "comparison"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-compare-02",
+   "endpoint": "chat_contents_search",
+   "q": "Name some Universal attribute heroes",
+   "expect_group": 17,
+   "expect_slug": null,
+   "top_group": 17,
+   "top_slug": "marci",
+   "max_distance": 0.55,
+   "tags": [
+    "hero",
+    "aggregate"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "marci",
+     "dist": 0.547,
+     "subject": "Marci"
+    },
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.562,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.569,
+     "subject": "Dawnbreaker"
+    },
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.593,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "slug": "mars",
+     "dist": 0.594,
+     "subject": "Mars"
+    }
+   ],
+   "kind": "group",
+   "best_distance": 0.547,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "hero-compare-03",
+   "endpoint": "chat_contents_search",
+   "q": "Which heroes are ranged supports?",
+   "expect_group": 17,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.55,
+   "tags": [
+    "hero",
+    "aggregate"
+   ],
+   "got": [],
+   "kind": "group",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-compare-04",
+   "endpoint": "chat_contents_search",
+   "q": "What are the tankiest strength heroes?",
+   "expect_group": 17,
+   "expect_slug": null,
+   "top_group": 17,
+   "top_slug": "dawnbreaker",
+   "max_distance": 0.55,
+   "tags": [
+    "hero",
+    "aggregate"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.612,
+     "subject": "Dawnbreaker"
+    },
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.612,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "slug": "mars",
+     "dist": 0.619,
+     "subject": "Mars"
+    },
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.635,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "slug": "marci",
+     "dist": 0.636,
+     "subject": "Marci"
+    }
+   ],
+   "kind": "group",
+   "best_distance": 0.612,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "hero-compare-05",
+   "endpoint": "chat_contents_search",
+   "q": "Which heroes have the highest win rate in public games?",
+   "expect_group": 17,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.6,
+   "tags": [
+    "hero",
+    "aggregate",
+    "popularity"
+   ],
+   "got": [],
+   "kind": "group",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-01",
+   "endpoint": "chat_contents_search",
+   "q": "What does Chronosphere do?",
+   "expect_group": 17,
+   "expect_slug": [
+    "faceless-void-h"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-02",
+   "endpoint": "chat_contents_search",
+   "q": "How long is Black Hole's cooldown?",
+   "expect_group": 17,
+   "expect_slug": [
+    "enigma"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-03",
+   "endpoint": "chat_contents_search",
+   "q": "What is the mana cost of Laguna Blade?",
+   "expect_group": 17,
+   "expect_slug": [
+    "lina"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-04",
+   "endpoint": "chat_contents_search",
+   "q": "Which ability taunts nearby enemies and forces them to attack?",
+   "expect_group": 17,
+   "expect_slug": [
+    "axe"
+   ],
+   "top_group": 17,
+   "top_slug": "kez",
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking",
+    "no-name"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "kez",
+     "dist": 0.593,
+     "subject": "Kez"
+    },
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.62,
+     "subject": "Primal Beast"
+    },
+    {
+     "group": 17,
+     "slug": "largo",
+     "dist": 0.638,
+     "subject": "Largo"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-05",
+   "endpoint": "chat_contents_search",
+   "q": "What does Counter Helix do?",
+   "expect_group": 17,
+   "expect_slug": [
+    "axe"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-06",
+   "endpoint": "chat_contents_search",
+   "q": "How much mana does Freezing Field cost?",
+   "expect_group": 17,
+   "expect_slug": [
+    "crystal-maiden"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-07",
+   "endpoint": "chat_contents_search",
+   "q": "Is Mana Break a passive or an active ability?",
+   "expect_group": 17,
+   "expect_slug": [
+    "antimage"
+   ],
+   "top_group": 17,
+   "top_slug": "marci",
+   "max_distance": 0.5,
+   "tags": [
+    "ability",
+    "chunking"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "marci",
+     "dist": 0.634,
+     "subject": "Marci"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "ability-08",
+   "endpoint": "chat_contents_search",
+   "q": "What are Invoker's invoked spells?",
+   "expect_group": 17,
+   "expect_slug": [
+    "invoker"
+   ],
+   "top_group": 17,
+   "top_slug": "void-spirit",
+   "max_distance": 0.55,
+   "tags": [
+    "ability",
+    "chunking",
+    "large-row"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.574,
+     "subject": "Void Spirit"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "lore-01",
+   "endpoint": "chat_contents_search",
+   "q": "What is the backstory of Faceless Void?",
+   "expect_group": 17,
+   "expect_slug": [
+    "faceless-void-h"
+   ],
+   "top_group": 17,
+   "top_slug": "void-spirit",
+   "max_distance": 0.5,
+   "tags": [
+    "lore"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.447,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "slug": "grimstroke",
+     "dist": 0.582,
+     "subject": "Grimstroke"
+    },
+    {
+     "group": 17,
+     "slug": "dawnbreaker",
+     "dist": 0.622,
+     "subject": "Dawnbreaker"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "lore-02",
+   "endpoint": "chat_contents_search",
+   "q": "Who is Invoker in the lore?",
+   "expect_group": 17,
+   "expect_slug": [
+    "invoker"
+   ],
+   "top_group": 17,
+   "top_slug": "void-spirit",
+   "max_distance": 0.5,
+   "tags": [
+    "lore"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "void-spirit",
+     "dist": 0.535,
+     "subject": "Void Spirit"
+    },
+    {
+     "group": 17,
+     "slug": "grimstroke",
+     "dist": 0.622,
+     "subject": "Grimstroke"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "lore-03",
+   "endpoint": "chat_contents_search",
+   "q": "Tell me the story of Yurnero the Juggernaut",
+   "expect_group": 17,
+   "expect_slug": [
+    "juggernaut"
+   ],
+   "top_group": 17,
+   "top_slug": "primal-beast",
+   "max_distance": 0.55,
+   "tags": [
+    "lore"
+   ],
+   "got": [
+    {
+     "group": 17,
+     "slug": "primal-beast",
+     "dist": 0.635,
+     "subject": "Primal Beast"
+    }
+   ],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": true,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "stats-01",
+   "endpoint": "chat_contents_search",
+   "q": "What is Anti-Mage's base damage and attack point?",
+   "expect_group": 17,
+   "expect_slug": [
+    "antimage"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "stats-02",
+   "endpoint": "chat_contents_search",
+   "q": "How fast is Bloodseeker's movement speed?",
+   "expect_group": 17,
+   "expect_slug": [
+    "bloodseeker"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "hero",
+    "stats"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "pop-01",
+   "endpoint": "chat_contents_search",
+   "q": "How often is Axe picked and what is his win rate?",
+   "expect_group": 17,
+   "expect_slug": [
+    "axe"
+   ],
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.55,
+   "tags": [
+    "hero",
+    "popularity"
+   ],
+   "got": [],
+   "kind": "slug",
+   "best_distance": null,
+   "top_slug_match": false,
+   "any_slug_match": false,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "lang-01",
+   "endpoint": "chat_contents_search",
+   "q": "Explain what a carry does in simple English",
+   "expect_group": null,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "language",
+    "known-gap"
+   ],
+   "got": [],
+   "kind": "negative",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": null,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "jargon-01",
+   "endpoint": "chat_contents_search",
+   "q": "What does BKB mean?",
+   "expect_group": 20,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": [],
+   "kind": "group",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "jargon-02",
+   "endpoint": "chat_contents_search",
+   "q": "What does CC mean in Dota?",
+   "expect_group": 20,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": [],
+   "kind": "group",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "jargon-03",
+   "endpoint": "chat_contents_search",
+   "q": "What is stacking and why do players do it?",
+   "expect_group": 20,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": [],
+   "kind": "group",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "jargon-04",
+   "endpoint": "chat_contents_search",
+   "q": "What is buyback?",
+   "expect_group": 20,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.5,
+   "tags": [
+    "jargon",
+    "empty-source"
+   ],
+   "got": [],
+   "kind": "group",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": false,
+   "distance_ok": false,
+   "passed": false
+  },
+  {
+   "id": "neg-01",
+   "endpoint": "chat_contents_search",
+   "q": "What item build should I use on Huskar mid?",
+   "expect_group": null,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "negative",
+    "routing"
+   ],
+   "got": [],
+   "kind": "negative",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": null,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "neg-02",
+   "endpoint": "chat_contents_search",
+   "q": "What is the current pro meta for offlane?",
+   "expect_group": null,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "negative",
+    "routing"
+   ],
+   "got": [],
+   "kind": "negative",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": null,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "neg-03",
+   "endpoint": "chat_contents_search",
+   "q": "How do I improve my last hitting?",
+   "expect_group": null,
+   "expect_slug": null,
+   "top_group": null,
+   "top_slug": null,
+   "max_distance": 0.45,
+   "tags": [
+    "negative",
+    "routing"
+   ],
+   "got": [],
+   "kind": "negative",
+   "best_distance": null,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": null,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "supp-01",
+   "endpoint": "chat_supplementary_search",
+   "q": "What item build should I use on Huskar mid?",
+   "expect_group": 12,
+   "expect_slug": null,
+   "top_group": 12,
+   "top_slug": "www-dotafire-com-dota-2-guide-3cs-comprehensive-guide-of-lanaya-6715",
+   "max_distance": 0.6,
+   "tags": [
+    "supplementary",
+    "build"
+   ],
+   "got": [
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-3cs-comprehensive-guide-of-lanaya-6715",
+     "dist": 0.49,
+     "subject": "Templar Assassin Build Guide DOTA 2: 3C&#x27;s Comprehensive"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-viper-the-carry-by-lt-vllx-gt-2104",
+     "dist": 0.495,
+     "subject": "Viper Build Guide DOTA 2: Viper The Carry by &lt;VllX&gt;"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-let-the-hooking-begin-a-guide-to-pudge-6727",
+     "dist": 0.513,
+     "subject": "Pudge Build Guide DOTA 2: Let The Hooking Begin! - A Guide T"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-devils-playground-7307",
+     "dist": 0.522,
+     "subject": "Juggernaut Build Guide DOTA 2: Devil&#x27;s Playground"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-how-to-play-real-mans-tiny-4782",
+     "dist": 0.546,
+     "subject": "Tiny Build Guide DOTA 2: How to play real mans tiny"
+    }
+   ],
+   "kind": "group",
+   "best_distance": 0.49,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "supp-02",
+   "endpoint": "chat_supplementary_search",
+   "q": "Give me a Legion Commander build guide",
+   "expect_group": 12,
+   "expect_slug": null,
+   "top_group": 12,
+   "top_slug": "www-dotafire-com-dota-2-guide-balanced-commander-work-in-progres-24452",
+   "max_distance": 0.6,
+   "tags": [
+    "supplementary",
+    "build"
+   ],
+   "got": [
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-balanced-commander-work-in-progres-24452",
+     "dist": 0.256,
+     "subject": "Legion Commander Build Guide DOTA 2: Balanced Commander(work"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-cj-captainjack-legioncommander-guide-28157",
+     "dist": 0.271,
+     "subject": "Legion Commander Build Guide DOTA 2: [Cj.CaptainJack].Legion"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-legion-commander-jungle-6-86-24466",
+     "dist": 0.303,
+     "subject": "Legion Commander Build Guide DOTA 2: Legion Commander Jungle"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-lich-king-8117",
+     "dist": 0.456,
+     "subject": "Lich Build Guide DOTA 2: Lich King"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-omega-mvp-io-pro-guide-27952",
+     "dist": 0.458,
+     "subject": "Io Build Guide DOTA 2: Omega MVP IO PRO GUIDE"
+    }
+   ],
+   "kind": "group",
+   "best_distance": 0.256,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  },
+  {
+   "id": "supp-03",
+   "endpoint": "chat_supplementary_search",
+   "q": "Beginner tips for playing support",
+   "expect_group": 12,
+   "expect_slug": null,
+   "top_group": 12,
+   "top_slug": "www-dotafire-com-dota-2-guide-templar-assassin-the-true-1v5-hero-7-00-25097",
+   "max_distance": 0.6,
+   "tags": [
+    "supplementary",
+    "beginner"
+   ],
+   "got": [
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-templar-assassin-the-true-1v5-hero-7-00-25097",
+     "dist": 0.462,
+     "subject": "Templar Assassin Build Guide DOTA 2: Templar Assassin - The "
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-unusual-support-sven-13852",
+     "dist": 0.475,
+     "subject": "Sven Build Guide DOTA 2: Unusual Support: Sven"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-tuskarr-can-support-7308",
+     "dist": 0.494,
+     "subject": "Tusk Build Guide DOTA 2: Tuskarr can support!!"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-drow-ranger-team-carry-6060",
+     "dist": 0.519,
+     "subject": "Drow Ranger Build Guide DOTA 2: Drow Ranger - Team Carry"
+    },
+    {
+     "group": 12,
+     "slug": "www-dotafire-com-dota-2-guide-darkestsabatas-elemental-of-bane-5847",
+     "dist": 0.527,
+     "subject": "Bane Build Guide DOTA 2: Darkestsabata&#x27;s elemental of b"
+    }
+   ],
+   "kind": "group",
+   "best_distance": 0.462,
+   "top_slug_match": null,
+   "any_slug_match": null,
+   "top_group_match": true,
+   "distance_ok": true,
+   "passed": true
+  }
+ ]
+}

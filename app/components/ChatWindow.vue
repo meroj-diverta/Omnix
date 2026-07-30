@@ -41,6 +41,11 @@ watch(
 </script>
 
 <style scoped>
+/*
+ * The layout shell widened to 72rem to make room for the codex pane, so the
+ * reading measure is held here instead — otherwise answer prose stretches to
+ * full width on a desktop screen.
+ */
 .chat-window {
   flex: 1;
   overflow-y: auto;
@@ -48,6 +53,9 @@ watch(
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  width: 100%;
+  max-width: 42rem;
+  margin: 0 auto;
 }
 
 .empty {
