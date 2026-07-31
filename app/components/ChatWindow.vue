@@ -57,8 +57,18 @@ watch(
   margin: 0 auto;
 }
 
+/*
+ * Bottom-aligned, not centred.
+ *
+ * An empty transcript has several hundred pixels of nothing to place somewhere.
+ * Centring split it, which left the lower half reading as a dead black block and
+ * stranded the greeting well above the input it is prompting you to use. Sitting
+ * it just above the composer puts the spare height at the top, under the header
+ * where the title already carries visual weight — and it matches the direction a
+ * transcript grows, so the first answer lands where the greeting was.
+ */
 .empty {
-  margin: auto;
+  margin: auto auto 0;
   text-align: center;
   color: var(--color-text-muted);
   max-width: 26rem;

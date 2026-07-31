@@ -88,14 +88,21 @@ export function useOmnix() {
     // still works, just without history. Failures here are recorded in
     // conversation.error and never block answering the question.
     let sessionId = conversation.currentId.value
-    if (isSignedIn.value) {
-      if (!sessionId) sessionId = await conversation.startSession(trimmed)
-      if (sessionId) await conversation.addMessage(sessionId, 'user', trimmed, asMode)
-    }
+    if (isSignedIn.value && !sessionId) sessionId = await conversation.startSession(trimmed)
 
     // The stateless operations get the last few questions prepended so follow-ups
     // resolve; see HISTORY_TURNS.
+    //
+    // Read *before* this turn is appended, deliberately. Appending first put the
+    // current question into its own "earlier questions" block — duplicated in the
+    // prompt, and crowding out one of the three slots it was meant to fill.
+    // startSession has already cleared history for a brand-new conversation, so a
+    // fresh thread correctly carries no prior context.
     const outgoing = isSignedIn.value ? conversation.withHistory(trimmed) : trimmed
+
+    if (isSignedIn.value && sessionId) {
+      await conversation.addMessage(sessionId, 'user', trimmed, asMode)
+    }
 
     // No sign-in gate: verified 2026-07-29 that a cookie-mode API structure
     // answers unauthenticated requests unless the endpoint itself carries an
@@ -162,7 +169,40 @@ export function useOmnix() {
     }
   }
 
-  return { messages, isLoading, mode, modes: CHAT_MODES, ask, conversation }
+  /**
+   * Show a stored conversation in the chat window.
+   *
+   * Only the turn text is persisted, so a resumed thread has no source list or
+   * images on its replies — those are properties of the live response, not of
+   * the conversation. Re-asking regenerates them.
+   */
+  async function openConversation(sessionId: number): Promise<void> {
+    await conversation.openSession(sessionId)
+    messages.value = conversation.history.value.map((m) => ({
+      id: `stored-${m.id}`,
+      role: m.role,
+      text: m.body,
+      createdAt: 0,
+      mode: m.mode as ChatMode | undefined
+    }))
+  }
+
+  /** Leave the current thread. The next question opens a fresh session. */
+  function newConversation(): void {
+    conversation.clearCurrent()
+    messages.value = []
+  }
+
+  return {
+    messages,
+    isLoading,
+    mode,
+    modes: CHAT_MODES,
+    ask,
+    conversation,
+    openConversation,
+    newConversation
+  }
 }
 
 function explain(error: unknown): string {

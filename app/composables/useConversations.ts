@@ -71,23 +71,38 @@ export function useConversations() {
   }
 
   /**
-   * Extension values come back either under their slug or as `ext_col_NN`
-   * depending on the site's response format, and this site has been seen using
-   * both. Read whichever is present rather than betting on one.
+   * Extension fields on group 25 carry no slug, so both the request body and the
+   * list response name them `ext_1`..`ext_4` — verified against api 7's OpenAPI
+   * document, not guessed. An earlier version read `ext_col_NN`, which does not
+   * appear anywhere in the schema and would have read empty forever.
    */
-  function ext(row: KurocoTopic, slug: string, col: string): string {
-    const v = row[slug] ?? row[col]
+  function ext(row: KurocoTopic, col: string): string {
+    const v = row[col]
     return v === undefined || v === null ? '' : String(v)
   }
 
+  /**
+   * `ext_1` (session_id) is a *relation* field, so it is written as a plain
+   * integer but reads back as `{module_type, module_id}`. Accept either, so the
+   * field can later be changed to plain text without touching this code.
+   */
+  function readSessionId(row: KurocoTopic): number {
+    const raw = row.ext_1 as unknown
+    if (raw && typeof raw === 'object') {
+      const rel = raw as { module_id?: number | string; topics_id?: number | string }
+      return Number(rel.module_id ?? rel.topics_id ?? 0)
+    }
+    return Number(raw ?? 0)
+  }
+
   function toMessage(row: KurocoTopic): ConversationMessage {
-    const role = ext(row, 'role', 'ext_col_02').toLowerCase() === 'omnix' ? 'omnix' : 'user'
+    const role = ext(row, 'ext_2').toLowerCase() === 'omnix' ? 'omnix' : 'user'
     return {
       id: Number(row.topics_id),
       role,
       body: decodeEntities(String(row.contents ?? '')),
-      seq: Number(ext(row, 'seq', 'ext_col_03') || 0),
-      mode: ext(row, 'mode', 'ext_col_04') || undefined
+      seq: Number(ext(row, 'ext_3') || 0),
+      mode: ext(row, 'ext_4') || undefined
     }
   }
 
@@ -101,11 +116,16 @@ export function useConversations() {
         method: 'GET',
         query: { cnt: 50 }
       })
-      sessions.value = (res.list ?? res.topics_list ?? []).map((r) => ({
-        id: Number(r.topics_id),
-        title: decodeEntities(String(r.subject ?? 'Untitled')),
-        updatedAt: r.update_ymdhi
-      }))
+      // Sorted here rather than by a pinned `order_query` on the endpoint: the
+      // ordering is presentation, and keeping it client-side means it can be
+      // changed without an admin round trip.
+      sessions.value = (res.list ?? res.topics_list ?? [])
+        .map((r) => ({
+          id: Number(r.topics_id),
+          title: decodeEntities(String(r.subject ?? 'Untitled')),
+          updatedAt: r.update_ymdhi
+        }))
+        .sort((a, b) => String(b.updatedAt ?? '').localeCompare(String(a.updatedAt ?? '')))
     } catch (e) {
       error.value = describe(e)
     }
@@ -138,16 +158,19 @@ export function useConversations() {
 
   async function loadMessages(sessionId: number): Promise<void> {
     try {
+      // No server-side `filter` is sent. The endpoint's allow-list does name
+      // ext_1, but ext_1 is a relation column and whether the filter DSL matches
+      // one by bare id is unverified — a malformed filter fails the whole
+      // request, whereas `my_own_list` + this client-side pass cannot. The cost
+      // is that a member with more than 200 turns in total loses the oldest;
+      // turn the server filter on once it has been exercised in a browser.
       const res = await request<KurocoTopicsList>(routes.messagesList, {
         method: 'GET',
-        // Filtered server-side where the endpoint allows it, and again on the
-        // client: the filter key depends on the site's ext response format, so
-        // the second pass guarantees correctness even if the first is ignored.
-        query: { cnt: 200, filter: `ext_col_01 eq ${sessionId}` }
+        query: { cnt: 200 }
       })
       const rows = res.list ?? res.topics_list ?? []
       history.value = rows
-        .filter((r) => Number(ext(r, 'session_id', 'ext_col_01')) === sessionId)
+        .filter((r) => readSessionId(r) === sessionId)
         .map(toMessage)
         .sort((a, b) => a.seq - b.seq)
     } catch (e) {
@@ -169,13 +192,16 @@ export function useConversations() {
     try {
       await request(routes.messagesCreate, {
         method: 'POST',
+        // ext_1..ext_4 are the property names the endpoint actually accepts —
+        // the fields have no slug, so their titles (session_id/role/seq/mode)
+        // are not valid keys and would be silently ignored.
         body: {
           subject: `${role} #${seq}`,
           contents: body,
-          session_id: String(sessionId),
-          role,
-          seq,
-          mode: mode ?? '',
+          ext_1: sessionId,
+          ext_2: role,
+          ext_3: seq,
+          ext_4: mode ?? '',
           open_flg: 1
         }
       })
@@ -201,6 +227,31 @@ export function useConversations() {
     return `Earlier questions in this conversation:\n${earlier.map((q) => `- ${q}`).join('\n')}\n\nCurrent question: ${question}`
   }
 
+  /** Switch to an existing conversation and load its turns. */
+  async function openSession(sessionId: number): Promise<void> {
+    remember(sessionId)
+    history.value = []
+    await loadMessages(sessionId)
+  }
+
+  /**
+   * Delete a conversation. The id goes in the path, not the body — the bare
+   * path 404s. Ownership is Kuroco's to enforce (owned-content edit
+   * restriction), so another member's row comes back 403 rather than deleting.
+   *
+   * The message rows are left behind: there is no bulk delete on an append-only
+   * structure, and they are unreachable once the session is gone.
+   */
+  async function deleteSession(sessionId: number): Promise<void> {
+    try {
+      await request(`${routes.sessionsDelete}/${sessionId}`, { method: 'POST' })
+      sessions.value = sessions.value.filter((s) => s.id !== sessionId)
+      if (currentId.value === sessionId) clearCurrent()
+    } catch (e) {
+      error.value = describe(e)
+    }
+  }
+
   function clearCurrent(): void {
     remember(null)
     history.value = []
@@ -215,6 +266,8 @@ export function useConversations() {
     listSessions,
     startSession,
     loadMessages,
+    openSession,
+    deleteSession,
     addMessage,
     withHistory,
     clearCurrent
