@@ -373,7 +373,40 @@ will look.
 
 ---
 
-## F19 — Docs never say where in the pipeline an AI dictionary applies
+## F19 — An AI dictionary does nothing until an endpoint names it, and nothing says so
+
+**Status:** open · **Area:** AI dictionary, docs · **Severity:** medium–high
+
+**CORRECTED 2026-07-31.** This entry originally claimed the dictionary rewrites
+the query before retrieval, evidenced by `Who is QoP?` returning Queen of Pain.
+**That evidence was invalid** — an embedding model places "QoP" near "Queen of
+Pain" unaided, so the observation had no control. Retested with the dictionary
+loaded and the result was unchanged, and caching was ruled out (`x-cache: MISS`
+on every call, execution time varying 177–381 ms, so each request really ran).
+
+**The actual mechanism:** the AI operations take two parameters —
+`input_dict_sys_nm` (input dictionary system name) and `output_dict_sys_nm`
+(output dictionary) — and a dictionary is **inert until an endpoint names one**.
+Creating a dictionary, filling it and ticking Enable changes nothing anywhere.
+
+That is the finding: the feature has a silent no-op configuration state. The
+dictionary screen gives every impression of being live — Enable checkbox, priority,
+row count — while nothing consumes it. Nothing in the dictionary UI mentions the
+endpoint parameters, and nothing on the endpoint side hints that these params
+exist unless you read the full parameter reference.
+
+**Cost:** a full session's worth of wrong conclusions, including a confidently
+reported one, plus a hunt through caching and query-rewriting theories to explain
+a feature that was never switched on.
+
+**Suggestion:** on the dictionary edit screen, show which endpoints reference this
+dictionary — and warn when none do. Conversely, offer the dictionary as a
+selectable dropdown on AI endpoints rather than a free-text system name. Also
+worth documenting that input and output dictionaries are separate levers.
+
+---
+
+## F19b — Original entry: docs never say where in the pipeline a dictionary applies
 
 **Status:** open · **Area:** AI dictionary, docs · **Severity:** medium
 
@@ -488,6 +521,71 @@ because the 0-hit path is the only path that refuses. A default that admits
 from retrieved context; refuse otherwise), or a `max_distance`-style relevance
 floor above which hits are discarded so the 0-hit refusal path takes over — plus
 a response field indicating whether the answer was grounded in the returned rows.
+
+---
+
+## F22 — API-created content is unpublished, and the response says it succeeded
+
+**Status:** open · **Area:** Topics API, endpoint settings · **Severity:** medium–high
+
+`Topics::insert` without an explicit `open_flg` creates the row unpublished, and
+answers:
+
+```json
+{"errors":[],"messages":["Added."],"id":10809}
+```
+
+Success, with an id. The row is then invisible to `Topics::list`, which returns
+published rows only. So a correctly-built create/list pair appears to work, and
+silently shows nothing — success followed by silence, with no error at either end
+to connect the two.
+
+The default itself is defensible: an API caller may be an end user, a form or an
+importer, and publishing straight to a public site without review would be worse.
+Kuroco's own tutorials pass `open_flg: 1` explicitly and note they are doing so
+"for simplicity, so the content is published immediately". The problem is
+discoverability, not the default.
+
+**Cost:** a "create works but list returns nothing" investigation that looked like
+a permissions or scoping bug — the two prime suspects were endpoint restrictions
+and `my_own_list` member scoping — when the rows were simply unpublished.
+
+**Suggestion:** say it in the response, e.g. `"messages": ["Added.", "Saved as
+unpublished (open_flg=0)."]`. Alternatively warn in the endpoint editor when an
+insert operation has no `open_flg` pinned, since that combination is almost always
+unintended for API-driven content.
+
+---
+
+## F23 — "Security mode" and "API request restriction" are easily read as one control
+
+**Status:** open · **Area:** API/endpoint settings, docs · **Severity:** medium
+
+Structure-level **security** (`cookie`, `static_token`, …) selects *which credential
+type is accepted*. Endpoint-level **API request restriction** (None / GroupAuth /
+MemberCustomSearchAuth) decides *whether a credential is required at all*. They are
+orthogonal, and `cookie` does not imply "login required".
+
+The confusion this produces is concrete and was hit directly — *"I still don't
+understand how 6 and 7 having the same security, one be open and the other
+closed?"* Observed on one site, both structures in `cookie` mode:
+
+| Endpoint | Restriction | Anonymous request |
+|---|---|---|
+| `6/rag_main_search`, `6/chat_contents_search` | None | **200** |
+| `7/chat_contents_search` | None | **200** |
+| `7/notes/list` | set | 401 |
+| `7/notes/create` | set | 403 |
+
+The practical hazard: switching a structure to `cookie` mode feels like locking it
+down, while endpoints with no restriction stay wide open. For AI endpoints that
+spend model budget per call, "feels locked, is open" is an expensive
+misunderstanding.
+
+**Suggestion:** on the API security screen, list endpoints whose restriction is
+None with a note that they remain publicly callable — and flag it more loudly for
+metered AI operations. Naming the two settings so they cannot be read as one
+(F2 makes the same point about read vs write) would help more.
 
 ---
 
