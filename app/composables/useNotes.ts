@@ -18,19 +18,38 @@ export interface NoteDraft {
 }
 
 /**
+ * How much of the member's own writing rides along with a question.
+ *
+ * Small on purpose. This text is embedded for the content search as well as
+ * read by the model, so every extra line pulls retrieval a little further from
+ * what was actually asked. Named so they can be tuned once the effect on
+ * retrieval is measurable.
+ */
+const MAX_PREFERENCES = 3
+const RELEVANT_NOTES = 2
+/** Per line, so one rambling note cannot dominate the prompt. */
+const MAX_NOTE_CHARS = 180
+
+function oneLine(note: Note): string {
+  const text = [note.title, note.body].map((s) => s.trim()).filter(Boolean).join(': ')
+  const flat = text.replace(/\s+/g, ' ').trim()
+  return flat.length > MAX_NOTE_CHARS ? `${flat.slice(0, MAX_NOTE_CHARS - 1)}…` : flat
+}
+
+/**
  * CRUD over the member-owned notes structure.
  *
- * Scoping caveat, deliberately recorded here because it is a real open question
- * and not a detail: Kuroco's Topics list API has no "only my rows" parameter.
- * `has_permissions` looks like it might be one but is about admin resource auth
- * and writer_groups, not per-row ownership. So the endpoint MUST enforce
- * `member_id = <session member>` server-side — via a pinned filter or a
- * preprocess custom function.
+ * Scoping: `Topics::list` does have an ownership parameter — **`my_own_list`**
+ * — and it is now pinned in `notes/list`'s server-side params. (An earlier
+ * comment here claimed no such parameter existed and proposed a preprocess
+ * custom function instead; that was wrong. `has_permissions`, the thing that
+ * looks like the candidate, is admin resource auth and writer_groups, not
+ * per-row ownership.) Keeping it pinned matters more than ever now that notes
+ * are fed to the chat model — see noteContext().
  *
- * Until that is verified, treat cross-member leakage as unproven either way.
- * `assertOwnership` below is a client-side tripwire, not a security control:
- * it cannot protect data, it can only make a server-side scoping failure
- * visible instead of silent.
+ * `assertOwnership` below stays as a client-side tripwire, not a security
+ * control: it cannot protect data, it can only make a server-side scoping
+ * failure visible instead of silent.
  */
 export function useNotes() {
   const { request, routes, decodeEntities } = useKuroco()
@@ -91,6 +110,72 @@ export function useNotes() {
     } finally {
       isLoading.value = false
     }
+  }
+
+  /**
+   * The member's own notes most semantically related to a question.
+   *
+   * Group 23 is vectorised, so `vector_search` on Topics::list does embedding
+   * search over it — and because it goes through `notes/list`, whose
+   * `my_own_list` is pinned server-side, it can only ever match rows the caller
+   * owns. That is the whole reason this does not go through
+   * `chat_contents_search`: see noteContext() below.
+   *
+   * Returns nothing on failure. Personalisation is a nicety; it must never stop
+   * a question being answered.
+   */
+  async function searchNotes(query: string, cnt = RELEVANT_NOTES): Promise<Note[]> {
+    if (!isSignedIn.value || !query.trim()) return []
+    try {
+      const res = await request<KurocoTopicsList>(routes.notesList, {
+        method: 'GET',
+        query: { cnt, vector_search: query }
+      })
+      const rows = res.list ?? res.topics_list ?? []
+      assertOwnership(rows)
+      return rows.map(toNote)
+    } catch {
+      return []
+    }
+  }
+
+  /**
+   * A compact "what Omnix knows about this player" block to prepend to a
+   * question, or '' when there is nothing worth saying.
+   *
+   * Why this is composed client-side instead of just adding group 23 to the
+   * chat endpoint's `topics_group_id`, which would be one config change:
+   * `OpenAI::chat_contents_search` applies no member filter — there is no
+   * `member_id` or `secure_level` anywhere in its query path — so notes in the
+   * shared index would be retrievable by *any* member asking a related
+   * question. One person's notes surfacing in someone else's chat is a data
+   * leak, not a personalisation feature. Fetching them through a member-scoped
+   * endpoint and passing them as text keeps retrieval private.
+   *
+   * Preferences come first and always: they are short, stable, and the thing
+   * that actually shapes an answer ("I play position 5 support"). Relevant
+   * notes are added per question. Both are capped, because this text is also
+   * what gets embedded for the content search — too much of it drags retrieval
+   * away from the question, the same reason only questions are replayed as
+   * conversation history.
+   */
+  async function noteContext(question: string): Promise<string> {
+    if (!isSignedIn.value) return ''
+
+    const prefs = myPreferences.value
+      .slice(0, MAX_PREFERENCES)
+      .map((n) => oneLine(n))
+      .filter(Boolean)
+
+    const related = (await searchNotes(question))
+      .filter((n) => n.kind !== 'preference')
+      .map((n) => oneLine(n))
+      .filter(Boolean)
+
+    const lines = [...prefs, ...related].slice(0, MAX_PREFERENCES + RELEVANT_NOTES)
+    if (!lines.length) return ''
+
+    return `About this player (their own saved notes):\n${lines.map((l) => `- ${l}`).join('\n')}`
   }
 
   async function create(draft: NoteDraft): Promise<boolean> {
@@ -155,7 +240,8 @@ export function useNotes() {
   return {
     notes, myNotes, myPreferences,
     isLoading, isSaving, error, leakWarning,
-    load, create, update, remove
+    load, create, update, remove,
+    searchNotes, noteContext
   }
 }
 

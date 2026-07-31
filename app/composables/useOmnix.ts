@@ -26,6 +26,7 @@ export const CHAT_MODES: ChatModeInfo[] = [
 export function useOmnix() {
   const { request, routes, decodeEntities } = useKuroco()
   const conversation = useConversations()
+  const { noteContext } = useNotes()
 
   const { isSignedIn } = useAuth()
 
@@ -98,7 +99,17 @@ export function useOmnix() {
     // prompt, and crowding out one of the three slots it was meant to fill.
     // startSession has already cleared history for a brand-new conversation, so a
     // fresh thread correctly carries no prior context.
-    const outgoing = isSignedIn.value ? conversation.withHistory(trimmed) : trimmed
+    let outgoing = isSignedIn.value ? conversation.withHistory(trimmed) : trimmed
+
+    // The member's own notes and preferences, so an answer can be pitched at the
+    // player asking it. Fetched through the member-scoped notes endpoint and
+    // passed as text rather than by adding the notes group to the chat
+    // endpoint's search index — that would make one member's notes retrievable
+    // by another. See useNotes.noteContext().
+    if (isSignedIn.value) {
+      const profile = await noteContext(trimmed)
+      if (profile) outgoing = `${profile}\n\n${outgoing}`
+    }
 
     if (isSignedIn.value && sessionId) {
       await conversation.addMessage(sessionId, 'user', trimmed, asMode)

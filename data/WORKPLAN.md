@@ -116,6 +116,36 @@ Carried forward:
 - **O32** — Deleting a session leaves its message rows orphaned (append-only
   structure, no bulk delete). Harmless but they accumulate.
 
+### Notes in the answer — ☑ BUILT 2026-07-31, unverified in a browser
+
+The member's own notes now ride along with each question:
+`useNotes.noteContext()` prepends up to 3 preferences plus up to 2 notes matched
+semantically against the question, each capped at 180 chars. `notes/list` (uri
+128) now pins **`my_own_list: true`** — previously unpinned, which O7 flagged —
+and group 23's vectorisation is used through **`?vector_search=`** on that
+member-scoped endpoint.
+
+**Group 23 is deliberately NOT added to `chat_contents_search`'s
+`topics_group_id`.** That one-line config change is the tempting version and it
+leaks: the AI operations apply no member filter, so any member could retrieve
+another's notes. Written up as **F29**. Group 23 is vectorised (`use_openai: 1`)
+but reachable only via the scoped endpoint — verified 2026-07-31 that no chat
+endpoint names it.
+
+- **O33** — 🔴 **Reproduce F29 with two accounts before reporting it.** Add group
+  23 to a *throwaway* chat endpoint, have member A save a distinctive note, ask
+  as member B, and see whether it comes back. Source review says it will; the
+  claim should not be filed on source reading alone. Delete the endpoint after.
+- **O34** — Measure what the injected profile does to retrieval. The block is
+  embedded along with the question, so it can drag the search off-topic — the
+  same hazard that keeps conversation history to questions only. Constants
+  (`MAX_PREFERENCES`, `RELEVANT_NOTES`, `MAX_NOTE_CHARS`) are named for tuning.
+- **O35** — `chat_contents_search` accepts **only `text`** in the body; `prompt`,
+  `max_distance` and the rest are endpoint config, not per-request. So there is
+  no way to pass persona or per-member context *out of band* — anything
+  personal must go into the same string that gets embedded. Worth raising
+  alongside P1's persona item.
+
 ### Chat / retrieval config
 
 - **O25** — 🔴 **A relevance threshold on api 7's `chat_contents_search` now admits

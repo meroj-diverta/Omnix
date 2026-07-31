@@ -748,6 +748,55 @@ to the default.
 
 ---
 
+## F29 — Vector search has no per-member scoping, so member-owned content cannot join a shared RAG index
+
+**Status:** open · **Area:** AI / RAG, content permissions · **Severity:** high (design-level, security)
+
+Kuroco gives a content structure two independent capabilities that look
+composable and are not:
+
+- **Per-member ownership.** `my_topics_only_limit_groups`, plus `my_own_list` on
+  `Topics::list`, scope rows to the member who authored them.
+- **Vectorisation.** `use_openai` puts the structure's rows in the embedding
+  index, where `OpenAI::chat_contents_search` can retrieve them by naming the
+  group in `topics_group_id`.
+
+Turn both on — the obvious way to build "the assistant knows my notes" — and the
+ownership half is silently dropped. The AI operations carry no member filter:
+there is no reference to `member_id` or `secure_level` anywhere in
+`nfs/lib/modules/ai/api/v1/OpenAI.php`'s query path. So any member asking a
+related question can retrieve another member's private rows, and the generated
+answer quotes them.
+
+Nothing warns about this. The content structure screen presents "convert to
+vector data" next to the ownership settings, and enabling both reads as
+"searchable, and private". The endpoint screen then asks only for a list of
+group ids.
+
+**Status of the evidence:** established by source review, and by the absence of
+any scoping parameter on the AI operations' signature (`topics_group_id`, `cnt`,
+`prompt`, `max_distance`, `filter`, `filter_request_allow_list`, … — none of
+them member-aware). **Not yet reproduced with two accounts**, which is the test
+worth running before this is reported.
+
+Note that `filter` is not a fix even though it is accepted: it is a
+client-supplied query parameter, so a caller can simply pass someone else's
+`member_id`. A per-request filter cannot be an authorisation boundary.
+
+**Workaround, and what Omnix does.** Keep member-owned content out of the shared
+index entirely. Retrieve it through a member-scoped `Topics::list` endpoint
+(`my_own_list` pinned server-side, `vector_search=` for semantic matching — this
+works, and is the one place vectorising a private structure pays off), then pass
+the result to the model as request text. Retrieval stays private; only the
+caller's own rows can ever reach the prompt.
+
+**Suggestion:** honour `my_topics_only_limit_groups` in the vector search path
+when the caller is an authenticated member; failing that, refuse to include a
+group whose ownership restriction is set in a multi-member endpoint, and say so
+at configuration time rather than silently widening access.
+
+---
+
 ## Reporting notes
 
 - F11 and F12 are already filed.
