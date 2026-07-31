@@ -103,9 +103,14 @@ onMounted(async () => {
   if (isSignedIn.value) await load()
 })
 
-// Notes are member-owned, so the list is only meaningful once a session exists.
-watch(isSignedIn, (signedIn) => {
-  if (signedIn) load()
+// Reload on every sign-in/out transition, not just sign-in. load() clears the
+// list when signed out; firing only on sign-in left the previous member's
+// notes on screen after they logged out — which, in a shared browser, reads
+// exactly like notes leaking between members. The `omnix-notes` state is a
+// single app-wide key, so it must be emptied on sign-out, not just refilled on
+// the next sign-in.
+watch(isSignedIn, () => {
+  load()
 })
 
 async function doSignIn() {

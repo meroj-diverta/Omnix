@@ -1,5 +1,12 @@
 # Omnix workplan — AI feature coverage + open issues
 
+> **PRIORITY (standing, reaffirmed 2026-07-31).** Omnix's purpose is **Kuroco's
+> improvement, not Omnix's** — Omnix is the lab rat, and `kuroco_feedback_log.md`
+> is the deliverable. In every session and plan, rank work by **Kuroco-friction
+> yield**, not product completeness or polish. Log findings the same session.
+> This lens is the default; it does not override a direct product request from
+> the user.
+
 Working scratchpad, kept deliberately terse. Two parts:
 
 - **§A** — the Kuroco AI feature coverage plan (agreed 2026-07-30). This is the
@@ -191,10 +198,14 @@ endpoint names it.
 - **O29** — `eval/run_eval.py` now 401s: it sends a static token to api 6, which
   is cookie-mode and restricted. Give it a login step, or its own structure.
   Blocks coverage item #6.
-- **O9** — Chat modes "Sources only" and "No retrieval" need `rag_search` and
-  `chat` on **api 7**. `6/rag_main_search` was created 2026-07-30 but api 6 is
-  static_token, so the browser cannot use it — still useful for `run_eval.py`.
-  Code expects `7/rag_search`; adjust the route string if the path differs.
+- **O9** — ☑ BUILT 2026-07-31. `7/rag_search` (uri 145, GET, OpenAI::rag_search,
+  group 17, `?query=`) and `7/chat` (uri 146, POST, OpenAI::chat, `{text}`) now
+  exist, both `GroupAuth [105]` to match the other chat endpoints. The client
+  already routed to `7/rag_search` and `7/chat`, so no code change — the mode
+  toggle's "Sources only" and "No retrieval" options work as soon as these
+  resolve. `model` is a required param on both (rag_search rejects its absence).
+  Browser-verify alongside O30. Note `rag_search` fixes O35's persona gap only
+  for the sources view, not the answer path.
 
 ### Signup / auth
 
