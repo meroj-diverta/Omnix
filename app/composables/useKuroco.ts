@@ -69,6 +69,11 @@ export const KUROCO_ROUTES = {
   emailValidate: '10/auth/invite',
   register: '10/auth/register',
 
+  // AI Agent sessions — the only tier with conversation history. Both need
+  // creating on api 7; see useAgent.ts for the security caveat.
+  agentCreateSession: '7/ai/create_session',
+  agentSendMessage: '7/ai/send_message',
+
   notesList: '7/notes/list',
   notesCreate: '7/notes/create',
   notesUpdate: '7/notes/update',

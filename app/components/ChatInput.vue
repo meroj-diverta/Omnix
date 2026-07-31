@@ -20,6 +20,22 @@
       </button>
     </div>
 
+    <!--
+      Agent mode keeps a server-side thread, so it needs controls the stateless
+      modes don't: which session you're in, and a way to abandon it and start
+      over. Shown only here, because a session id means nothing in the others.
+    -->
+    <div v-if="mode === 'agent'" class="session-bar">
+      <span v-if="agent.sessionId.value" class="session-id">
+        Session #{{ agent.sessionId.value }}
+        <span class="warn" title="Kuroco does not check who owns a session id (see useAgent.ts)">· unscoped</span>
+      </span>
+      <span v-else class="session-id muted">No session yet — starts on your first message</span>
+      <button type="button" class="ghost" :disabled="agent.isBusy.value" @click="newSession">
+        {{ agent.sessionId.value ? 'New session' : 'Start session' }}
+      </button>
+    </div>
+
     <form class="chat-input" @submit.prevent="submit">
       <textarea
         v-model="draft"
@@ -42,7 +58,16 @@ import type { ChatMode, ChatModeInfo } from '~/types/chat'
 const props = defineProps<{ isLoading: boolean; mode: ChatMode; modes: ChatModeInfo[] }>()
 const emit = defineEmits<{ ask: [query: string]; 'update:mode': [mode: ChatMode] }>()
 
+const agent = useAgent()
 const draft = ref('')
+
+// Sessions outlive a reload, so pick up any existing one on mount.
+onMounted(agent.restore)
+
+async function newSession() {
+  agent.endSession()
+  await agent.startSession()
+}
 
 function submit() {
   if (props.isLoading || !draft.value.trim()) return
@@ -77,6 +102,44 @@ function submit() {
 .modes button.on {
   border-color: var(--color-fel);
   color: var(--color-fel-bright);
+}
+
+.session-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1rem 0;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.session-id {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-id.muted {
+  opacity: 0.75;
+}
+
+/* Not decoration: the id is guessable and Kuroco does not check ownership. */
+.warn {
+  color: var(--color-gold);
+}
+
+.session-bar .ghost {
+  padding: 0.2rem 0.55rem;
+  font-size: 0.7rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.session-bar .ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .chat-input {

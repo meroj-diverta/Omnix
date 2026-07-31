@@ -48,6 +48,27 @@ export interface KurocoProfile extends KurocoEnvelope {
   login_id?: string
 }
 
+/** AiAgent::create_session — observed shape: {ai_session_id, ai_agent_id, status}. */
+export interface KurocoAgentSession extends KurocoEnvelope {
+  ai_session_id?: number
+  ai_agent_id?: number
+  status?: string
+}
+
+/**
+ * AiAgent::send_message. The reply field is undocumented and has never been seen
+ * working here, so every plausible location is optional and readReply() picks.
+ */
+export interface KurocoAgentReply extends KurocoEnvelope {
+  reply?: string
+  message?: string
+  text?: string
+  content?: string
+  data?: { message?: string; reply?: string }
+  events?: unknown[]
+  session_status?: string
+}
+
 /** A row from the member-owned notes structure. */
 export interface KurocoTopic extends KurocoEnvelope {
   topics_id: number

@@ -20,11 +20,13 @@ export const CHAT_MODES: ChatModeInfo[] = [
   { key: 'answer', label: 'Answer', hint: 'Retrieve + generate — the normal mode', operation: 'chat_contents_search' },
   { key: 'supplementary', label: 'Supplementary', hint: 'Retrieve + generate over the supplementary source', operation: 'chat_supplementary_search' },
   { key: 'sources', label: 'Sources only', hint: 'Retrieve, no generated answer', operation: 'rag_search' },
-  { key: 'raw', label: 'No retrieval', hint: 'Plain model answer, ignores indexed content', operation: 'chat' }
+  { key: 'raw', label: 'No retrieval', hint: 'Plain model answer, ignores indexed content', operation: 'chat' },
+  { key: 'agent', label: 'Agent', hint: 'Keeps conversation history — follow-up questions work', operation: 'AiAgent::send_message' }
 ]
 
 export function useOmnix() {
   const { request, routes, decodeEntities } = useKuroco()
+  const agent = useAgent()
 
   const messages = useState<ChatMessage[]>('omnix-messages', () => [])
   const isLoading = useState('omnix-loading', () => false)
@@ -90,6 +92,19 @@ export function useOmnix() {
     // worst failure mode for a tool whose entire job is being trusted on facts.
     isLoading.value = true
     try {
+      // The agent tier is a different animal: it holds a server-side thread, so
+      // it answers from the conversation rather than from a fresh retrieval each
+      // time. No `list`, so no sources to cite.
+      if (asMode === 'agent') {
+        const reply = await agent.send(trimmed)
+        pushMessage(
+          reply
+            ? { role: 'omnix', mode: asMode, text: reply }
+            : { role: 'omnix', mode: asMode, text: agent.error.value ?? 'The agent returned nothing.', isError: true }
+        )
+        return
+      }
+
       // rag_search takes its query on the query string, not in a JSON body —
       // confirmed against the live endpoint on api 6. The other three take
       // {text} by POST.
@@ -143,7 +158,7 @@ export function useOmnix() {
     }
   }
 
-  return { messages, isLoading, mode, modes: CHAT_MODES, ask }
+  return { messages, isLoading, mode, modes: CHAT_MODES, ask, agent }
 }
 
 function explain(error: unknown): string {
