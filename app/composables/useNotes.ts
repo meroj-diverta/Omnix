@@ -100,7 +100,7 @@ export function useNotes() {
     try {
       await request(routes.notesCreate, {
         method: 'POST',
-        body: { subject: draft.title.trim() || 'Untitled note', contents: draft.body, note_kind: draft.kind }
+        body: { subject: draft.title.trim() || 'Untitled note', contents: draft.body, note_kind: draft.kind, open_flg: 1 }
       })
       await load()
       return true
