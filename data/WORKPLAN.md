@@ -48,7 +48,7 @@ Ordered by friction-yield per unit of effort. "Who": admin clicks (user) vs code
 | 6 | **Embedding template + eval** | Change `search_template_vector`, re-run `eval/run_eval.py`, measure the delta | shared | ☐ | Whether template changes are observable in retrieval quality, and how re-embedding is triggered/queued |
 | 7 | **Post-processing pilot on group 12** | 10-row `clean_guide` pilot, CSV upload with lightweight mode OFF + Force run. Spec: `ai_postprocess_group12.md` | user | ☐ | Confirms F14 end to end and prices the full sweep (~3,900 rows) |
 | 8 | **Spider** | Crawl patch notes into a new structure, then fill custom fields via post-processing — the documented workaround for Spider's limitation | user | ☐ | F13 + F14 in combination: the limitation *and* its blocked workaround |
-| 9 | **AI Agent tier** | Unblock `send_message` (bad Bedrock model id), zero-tool agent, run the memory test | user | ☐ blocked (O15) | Whether Bedrock-harness sessions carry real memory; also the F15 ownership gap in practice |
+| 9 | **AI Agent tier** | **Not for user-facing chat** — decided 2026-07-31 (F15 + F16). Keep for internal tasks only; the memory test is still worth running to settle whether Bedrock sessions persist | user | ◐ deferred | Already produced F15/F16. Blocked on a valid Bedrock model id; note `ai_agent_id: 1` is stale |
 | 10 | **Autonomous agent + mailbox** | Daily patch-notes summariser triggered by mail or cron | user | ☐ | The mail-triggers-an-agent path, loop guards, and what an unattended failure looks like |
 | 11 | **RAG Quickstart + RAG log** | Use both throughout the above; log UX gaps | user | ☐ | Whether the built-in tooling is enough to debug retrieval without curl — this session needed curl constantly |
 
@@ -60,49 +60,27 @@ content editing in the admin (copilot).
 
 ## §B — Open issues
 
-### Notes — decided: native `omnix_user` group, proxy abandoned
+### Notes — ☑ DONE 2026-07-31, verified end to end
 
-**Decision 2026-07-30:** notes go through the direct `Topics::*` endpoints with a
-new `omnix_user` member group. The custom-function proxy and its hidden api-5
-endpoint are being deleted. Frontend needs no change — `useNotes.ts` already
-calls `7/notes/*`; only what sits behind those paths changes.
+Native `omnix_user` group, no proxy. Verified with the test member in a real
+browser: create 201, list 200, update "Updated", delete "Deleted", and deleting
+**another member's** row correctly refused with `403 You are not authorized` —
+so Kuroco enforces owned-content editing itself. O1, O2, O5, O6b, O8 all closed.
 
-- **O1** — Create the `omnix_user` group: User type = **Editing user**, "disable
-  management-screen access" ticked, content permissions only (View/Create/Update/
-  Delete), **not** Administrator. Point new registrations at it in two places:
-  the site-wide default-group setting, and `default_group_id` on the register
-  endpoint.
-- **O2** — On the notes structure: **Edit restriction** = `omnix_user`, **Edit
-  restriction limited to owned content** = `omnix_user`. Group 23 already carries
-  `writer_groups:['User']` + `my_topics_only_limit_groups:['User']` per
-  `Plan_Jul30.md`, so this may be a rename/reassign rather than new work.
-- **O3** — Confirm `omnix_user` appears in **no other structure's** edit
-  restriction — 17 (Hero+Lore), 20 (Guides), 12 (Supplementary). That is the RAG
-  corpus; it is the whole product.
-- **O4** — Existing test member is in the old group. Changing the default only
-  affects new registrations, so it will keep 403ing until moved by hand.
-  `7/auth/token` currently answers *"Member is not in any of the allowed groups"*.
-- **O5** — ☑ Resolved 2026-07-31. `7/notes/create` now points at `Topics::insert`
-  directly and refuses anonymous callers (probed with `validate_only:true` so
-  nothing was written: `403 Insufficient permissions`). The proxy and api 5 are
-  gone.
-- **O6** — Orphaned notes rows. **Test members were deleted 2026-07-31, and
-  deleting a member does not delete their content**, so any rows they created —
-  plus stray row `topics_id 10809` from a diagnostic — now belong to members that
-  no longer exist. Because `my_own_list` scopes to the current member, these are
-  invisible to the app but still present. Clear them out so they don't muddy
-  future tests.
-- **O6b** — `notes/list` returned nothing after a successful create. Two candidates:
-  (a) API-created content is **not auto-published**, and `Topics::list` returns
-  published rows only — the gotcha already recorded in findings §3.4; fix by
-  pinning `open_flg: 1` / `open_type: open` in the create endpoint's params.
-  (b) the rows belong to a now-deleted member (see O6). Check the row's publish
-  state and owner in the admin.
-- **O7** — `7/notes/list` needs the **`my_own_list`** parameter ticked, or members
-  see each other's notes.
-- **O8** — Notes CRUD has never run end to end. `update`/`delete` take the id in
-  the **path** (`useNotes.ts` fixed for this, unverified live); `remove()` also
-  sends `topics_id` in the body — harmless, redundant.
+Two carried forward:
+
+- **O6** — Orphaned rows from deleted members, incl. `topics_id 10809` and probe
+  row `10812` ("PROBE published?"). Undeletable by the app (owned by absent
+  members); remove from the admin.
+- **O7** — Pin `open_flg: 1` in the `notes/create` endpoint's params. It works
+  from the request body today, which also means a client can deliberately create
+  hidden rows. Also confirm `my_own_list` is ticked on `notes/list`.
+
+### Conversation history — frontend done, Kuroco side missing
+
+- **O26** — 🔶 **Create the two structures and five endpoints in §C.** The client
+  (`useConversations.ts`) is built, typechecked and committed; nothing works until
+  these exist. This is the first thing to do with admin MCP access.
 
 ### Chat / retrieval config
 
@@ -141,6 +119,14 @@ calls `7/notes/*`; only what sits behind those paths changes.
 
 ### Chat modes
 
+- **O27** — 🔴 `7/chat_contents_search` still answers **anonymously** and spends
+  model budget per call. Api 6 was restricted 2026-07-31; api 7 was not.
+- **O28** — Bind the AI dictionary: set **`input_dict_sys_nm`** = `dota_jargon` on
+  the api 7 chat endpoint. Until then the dictionary is inert (F19). Then A/B it
+  properly, and try `output_dict_sys_nm` as a separate lever.
+- **O29** — `eval/run_eval.py` now 401s: it sends a static token to api 6, which
+  is cookie-mode and restricted. Give it a login step, or its own structure.
+  Blocks coverage item #6.
 - **O9** — Chat modes "Sources only" and "No retrieval" need `rag_search` and
   `chat` on **api 7**. `6/rag_main_search` was created 2026-07-30 but api 6 is
   static_token, so the browser cannot use it — still useful for `run_eval.py`.
@@ -192,3 +178,61 @@ calls `7/notes/*`; only what sits behind those paths changes.
 - 18 further findings in `kuroco_feedback_log.md` — **not yet reported**. F2/F3/F4/
   F6/F10 are the highest-value cluster (all diagnosability); F15/F16 are security
   and should not go in a public issue.
+
+---
+
+## §C — Ready to build (needs admin MCP)
+
+Everything below is specified from things verified the hard way this week. The
+frontend for it is already committed; none of it works until these exist.
+
+### Structures
+
+**`omnix_sessions`** — one row per conversation. `subject` = title (first
+question, 80 chars), `contents` = optional summary. **No extension fields.**
+
+**`omnix_messages`** — one row per turn, append-only:
+
+| ext | Slug | Type | Purpose |
+|---|---|---|---|
+| ext_1 | `session_id` | text | `topics_id` of the session row; filtered on |
+| ext_2 | `role` | text | `user` or `omnix` |
+| ext_3 | `seq` | number | ordering — `inst_ymdhi` is too coarse for same-second turns |
+| ext_4 | `mode` | text | which AI operation answered |
+
+Both structures: **`writer_groups` = `omnix_user`** and **owned-content edit
+restriction = `omnix_user`**. Do **not** enable vectorisation on either — member
+notes and conversations in a shared RAG index is the leak described in
+`kuroco_frontend_endpoints.md`, and worth testing deliberately later rather than
+switching on by accident.
+
+### Endpoints (api 7, request restriction `omnix_user` on all five)
+
+| Path | Operation | Params |
+|---|---|---|
+| `sessions/list` | `Topics::list` | pinned group, `my_own_list`, order `inst_ymdhi desc`, `cnt: 50` |
+| `sessions/create` | `Topics::insert` | pinned group, **`open_flg: 1`** |
+| `sessions/delete/{id}` | `Topics::delete` | pinned group |
+| `messages/list` | `Topics::list` | pinned group, `my_own_list`, `cnt: 200`, `filter_request_allow_list: ext_col_01` |
+| `messages/create` | `Topics::insert` | pinned group, **`open_flg: 1`** |
+
+The id goes in the **path** for delete (`{id}`), not the body — the bare path
+404s.
+
+### Why each of those settings is there
+
+- **`open_flg: 1`** — without it the insert returns `"Added."` with an id and the
+  row is invisible to list. Cost hours (F22).
+- **`my_own_list`** — the only per-member scoping parameter; `has_permissions` is
+  something else entirely (F18).
+- **owned-content edit restriction** — Kuroco then enforces ownership itself;
+  verified by a 403 when deleting another member's row.
+- **request restriction `omnix_user`** — not the *structure* security mode, which
+  is orthogonal and does not require a login (F23).
+
+### Then verify
+
+Sign in as the test member in a browser (cookie is `HttpOnly` + only issued to
+allowed origins, so curl cannot do this — see §13.2 of the findings), ask two
+questions, and confirm: a session row appears, two message rows per exchange with
+increasing `seq`, the conversation picker lists it, and reloading resumes it.

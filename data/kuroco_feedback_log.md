@@ -626,6 +626,42 @@ F23 for the same confusion in other places.
 
 ---
 
+## F25 — Cookie auth is cross-site by default, and `Set-Cookie` only appears for allowed origins
+
+**Status:** open · **Area:** auth, CORS, docs · **Severity:** medium
+
+Two related observations from getting cookie-mode login working.
+
+**1. The session cookie is third-party in the default hosting layout.** A Kuroco
+site's front (`*.g.kuroco-front.app`) and API (`*.g.kuroco.app`) are different
+registrable domains, so the session cookie is issued
+`__Host-rcms_api_access_token; HttpOnly; Secure; SameSite=None` — i.e. a
+third-party cookie. It works today, and `api-security.md` does note that domains
+should be matched to make it first-party, but the default KurocoFront + Kuroco
+pairing produces the opposite and nothing warns at setup time. As browsers finish
+restricting third-party cookies, every site on the default layout breaks at once.
+
+**2. `Set-Cookie` is only sent when the request carries an allowed `Origin`.**
+Requests without one — curl, server-to-server, a test harness — get a `200` and a
+body containing `access_token`, and no cookie. Reasonable behaviour, but it makes
+diagnosis badly misleading: it is indistinguishable from "the server never sets a
+cookie", which is what we concluded for some time. The returned `access_token`
+also cannot be substituted as a header credential on a cookie-mode structure, so
+a non-browser client has no working path at all.
+
+**Cost:** a long detour concluding cookie auth was broken, resolved only by
+driving a real browser over CDP and reading the cookie jar through DevTools
+protocol, since the cookie is `HttpOnly` and invisible to `document.cookie`.
+
+**Suggestion:** state on the security screen that cookie mode requires matched
+domains for first-party cookies, and ideally warn when the configured CORS
+origins are cross-site with the API host. Separately, document that
+`Login::token` on a cookie structure returns `access_token` for token-mode use
+and sets the cookie only for allowed origins — or accept the returned token as a
+header credential so non-browser clients have a supported path.
+
+---
+
 ## Reporting notes
 
 - F11 and F12 are already filed.

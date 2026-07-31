@@ -968,3 +968,102 @@ and rects at any viewport, `elementFromPoint` proves a control is actually
 clickable rather than merely present, and `Page.captureScreenshot` gives an image
 to look at. This is how the toggle bug was reproduced as a fact
 (`buttonDisplay: "none"` at 1200px closed) instead of argued about.
+
+## 13. Session 2026-07-31 — auth works end to end; agent tier rejected
+
+Read after §12. This session got the logged-in surface working for the first
+time, and made one architectural decision that supersedes §9's Stage 2 plan.
+
+### 13.1 Login is two calls, and ours only made one
+
+`Login::login_challenge` returns `{grant_token, member_id, status: 0}` and
+**creates no session**. `Login::token` exchanges that token for one. Stopping
+after the first call looks like success — HTTP 200, a member id in the body —
+while leaving the caller unauthenticated. That was the cause of the long-standing
+"signed in, but the session did not stick" symptom. Fixed in `useAuth.signIn`;
+the route table gained `7/auth/token`.
+
+Documented in `tutorials/integrate-login`, so this was our bug, not Kuroco's, and
+it is deliberately **not** in the feedback log.
+
+### 13.2 The session cookie, and why curl could not see it
+
+The credential is `__Host-rcms_api_access_token`, `HttpOnly; Secure;
+SameSite=None`. Two things follow:
+
+- **`Set-Cookie` is only sent when the request carries an allowed `Origin`.**
+  curl gets `200` plus an `access_token` in the body and no cookie. That token is
+  *not* accepted as a header credential on a cookie-mode structure, so a
+  non-browser client has no working path — every API check that needs a session
+  must be driven through a browser.
+- The cookie is `HttpOnly`, so `document.cookie` is empty. Use CDP
+  `Network.getCookies`, as in §12.6's technique.
+
+Logged as F25, together with the third-party-cookie exposure of the default
+front/API domain split.
+
+### 13.3 The whole notes surface now works
+
+Verified with the test member through a real browser session:
+
+| Operation | Result |
+|---|---|
+| `notes/create` | 201, id returned |
+| `notes/list` | 200 — **only returns rows created with `open_flg: 1`** |
+| `notes/update/{id}` | "Updated" |
+| `notes/delete/{id}` | "Deleted" |
+| deleting another member's row | **403 "You are not authorized"** |
+
+That last line is the important one: **Kuroco enforces owned-content editing
+itself**, so the `omnix_user` design works and no application-side ownership
+check is needed. `open_flg: 1` must be sent (or pinned) on insert — see F22.
+`open_type` is rejected outright; `open_flg` is the only spelling.
+
+Config that made this work: an `omnix_user` group (Editing user, admin screens
+disabled, content permissions only), `writer_groups` + owned-content edit
+restriction on the notes structure, and — the non-obvious one — the
+**`allowed_group_ids` method parameter** on `auth/token`. Restricting that
+endpoint by *API request restriction* instead locks everyone out, because the
+caller has no session yet at that point (F24).
+
+### 13.4 The AI dictionary was never switched on
+
+`input_dict_sys_nm` and `output_dict_sys_nm` are endpoint parameters, and a
+dictionary does nothing until an endpoint names one. Creating, filling and
+enabling it changes nothing. The earlier claim in this file that dictionary
+substitution was proven working is **withdrawn** — that evidence ("QoP" retrieving
+Queen of Pain) is explained by the embedding model alone. See F19.
+
+### 13.5 DECISION — do not use AI Agent sessions for user-facing chat
+
+Supersedes the direction in §5/§9. Two independent reasons:
+
+1. **Tool grants live on the agent, not the caller** (F16). Any exposed agent
+   shares its full capability with every user, so prompt injection escalates to
+   whatever it can do. A system prompt is not a control.
+2. **`ai_session_id` ownership is unenforced** (F15). Transcripts leak between
+   members regardless of tooling.
+
+**Conversation history is therefore ours**, in two content structures. The AI
+Agent tier stays available for internal, non-user-facing tasks. `useAgent.ts`
+remains in the repo, unwired from the chat, for that purpose.
+
+Because the single-shot operations are stateless, context is replayed per
+request: **the last 3 of the member's own earlier questions**, questions only,
+not answers — they carry the referent a follow-up needs, at a fraction of the
+tokens, and generated prose fed back into a vector search dilutes retrieval. The
+number is a named constant (`HISTORY_TURNS`) to be tuned once measurable.
+
+Frontend is built and committed. **The Kuroco side does not exist yet** — the
+exact specification is in `data/WORKPLAN.md` §C.
+
+### 13.6 Housekeeping
+
+- Temp APIs **8 and 9 are gone** (privileged_static_token structures — closed).
+- `ai_agent_id: 1` in §5.3 is **stale**; that agent no longer exists. Check
+  `/management/ai/ai_agent_edit/?ai_agent_id=N` for the real id before pinning it.
+- Api 6 was switched to `cookie` and its endpoints restricted, so
+  `eval/run_eval.py`'s static-token path now **401s** — the eval needs a login
+  step or its own structure before item #6 can be measured.
+- **`7/chat_contents_search` still answers anonymously** and spends model budget
+  per call.
