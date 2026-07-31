@@ -143,7 +143,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.4rem 0.5rem 0;
+  padding: 0.3rem 0.5rem 0.1rem;
 }
 
 .pane-toggle {
