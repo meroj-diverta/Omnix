@@ -461,6 +461,29 @@ retrieved row, presented alongside citations to rows that do not contain it.
    provided context" — no system prompt or persona field exists on the single-shot
    AI operations, so an integrator cannot impose grounding themselves.
 
+**Second reproduction, 2026-07-31 — a relevance threshold makes this far worse.**
+The same endpoint began returning distant neighbours where it previously returned
+nothing, and the fabrication followed immediately:
+
+| Query | hits | worst distance kept |
+|---|---|---|
+| `Roshan` | 10 | 0.679 |
+| `Black King Bar` | 10 | 0.742 |
+| **`quantum chromodynamics`** | **10** | **0.824** |
+| `how to bake bread` | 0 | — |
+
+"Quantum chromodynamics" retrieves ten Dota 2 heroes. The day before, `Black King
+Bar` at distance 0.691 was rejected outright and the endpoint refused cleanly;
+after the threshold moved, the same query returns ten unrelated heroes and the
+model answers about Black King Bar from its own knowledge while citing
+Brewmaster, Spirit Breaker and Monkey King. Identical across three consecutive
+runs, so this is configuration, not sampling noise.
+
+The lesson is that `max_distance` is not a tuning nicety — it is the only thing
+standing between "clean refusal" and "confident fabrication with citations",
+because the 0-hit path is the only path that refuses. A default that admits
+0.8-distance matches makes the failure mode the common case.
+
 **Suggestion:** either a per-endpoint strict-grounding parameter (answer only
 from retrieved context; refuse otherwise), or a `max_distance`-style relevance
 floor above which hits are discarded so the 0-hit refusal path takes over — plus

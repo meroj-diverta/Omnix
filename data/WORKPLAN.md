@@ -82,12 +82,22 @@ calls `7/notes/*`; only what sits behind those paths changes.
 - **O4** — Existing test member is in the old group. Changing the default only
   affects new registrations, so it will keep 403ing until moved by hand.
   `7/auth/token` currently answers *"Member is not in any of the allowed groups"*.
-- **O5** — 🔴 **`7/notes/create` accepts writes with no session.** Confirmed by
-  actually creating a row, not inferred. Needs API request restriction →
-  GroupAuth. Highest-priority security item; it may disappear with the proxy, but
-  verify after the rewire rather than assuming.
-- **O6** — 🔴 **Delete stray row `topics_id 10809`** ("probe"), created by a
-  diagnostic call through the open endpoint above.
+- **O5** — ☑ Resolved 2026-07-31. `7/notes/create` now points at `Topics::insert`
+  directly and refuses anonymous callers (probed with `validate_only:true` so
+  nothing was written: `403 Insufficient permissions`). The proxy and api 5 are
+  gone.
+- **O6** — Orphaned notes rows. **Test members were deleted 2026-07-31, and
+  deleting a member does not delete their content**, so any rows they created —
+  plus stray row `topics_id 10809` from a diagnostic — now belong to members that
+  no longer exist. Because `my_own_list` scopes to the current member, these are
+  invisible to the app but still present. Clear them out so they don't muddy
+  future tests.
+- **O6b** — `notes/list` returned nothing after a successful create. Two candidates:
+  (a) API-created content is **not auto-published**, and `Topics::list` returns
+  published rows only — the gotcha already recorded in findings §3.4; fix by
+  pinning `open_flg: 1` / `open_type: open` in the create endpoint's params.
+  (b) the rows belong to a now-deleted member (see O6). Check the row's publish
+  state and owner in the admin.
 - **O7** — `7/notes/list` needs the **`my_own_list`** parameter ticked, or members
   see each other's notes.
 - **O8** — Notes CRUD has never run end to end. `update`/`delete` take the id in
@@ -96,6 +106,12 @@ calls `7/notes/*`; only what sits behind those paths changes.
 
 ### Chat / retrieval config
 
+- **O25** — 🔴 **A relevance threshold on api 7's `chat_contents_search` now admits
+  distance-0.82 matches**, so "quantum chromodynamics" returns ten Dota heroes and
+  the model answers from its own knowledge while citing them. The day before, the
+  same endpoint refused cleanly at 0.691. Check that endpoint's `max_distance` /
+  `cnt` params — a parallel session may have changed them. This is the single
+  setting separating refusal from citation-backed fabrication (F21).
 - **O22** — 🔶 `chat_contents_search` on api 7 searches **group 17 only** (proven:
   every hit across four queries carried `topics_group_id: 17`; "Black King Bar"
   returned 0). Items and builds live in group 12, reachable only via
