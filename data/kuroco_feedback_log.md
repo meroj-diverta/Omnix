@@ -662,9 +662,100 @@ header credential so non-browser clients have a supported path.
 
 ---
 
+## F26 — A field with no slug is addressed as `ext_N`, and its title looks like a key
+
+**Status:** open · **Area:** Topics API, extension fields, docs · **Severity:** medium
+
+Give an extension field a **Title** of `session_id` and leave **Slug** empty —
+the ordinary result of creating fields in the admin UI, where Title is required
+and Slug is not. The API then names that field `ext_1`, in both directions:
+
+```
+request body  { "ext_1": 10820, "ext_2": "user", "ext_3": 0 }
+list response { "ext_1": {...}, "ext_2": "user", "ext_3": "0" }
+```
+
+`session_id` is not a key anywhere. Posting it is accepted — `Topics::insert`
+ignores unknown properties silently (same permissiveness as F22's neighbour,
+`Member::insert`) — so the row is created, `201` comes back with an id, and the
+field is simply empty. The failure is invisible at both ends.
+
+The admin UI reinforces the wrong guess: the field is *labelled* `session_id`
+everywhere an integrator looks, and nothing on the field-settings screen says
+that the label is display-only while the wire name is positional. Nor is
+`ext_col_01` right, though it appears in some response formats and in this
+project's own earlier notes.
+
+**Cost:** the client for this feature was written against the titles and against
+`ext_col_NN`, and both are wrong. Caught only by reading the generated OpenAPI
+document for the API structure — which is, notably, the one place that states
+the truth unambiguously.
+
+**Suggestion:** default the slug to the title (slugified) when a field is
+created, or surface the effective API key next to each field on the settings
+screen — "API key: `ext_1`" — so the name an integrator must send is visible
+where the field is defined. Rejecting unknown `ext_*`-shaped properties on
+insert would turn the silent drop into an error.
+
+---
+
+## F27 — Relation fields are write-integer, read-object
+
+**Status:** open · **Area:** Topics API, extension fields · **Severity:** low–medium
+
+A relation field (`ext_type: 20`) declares this in the OpenAPI request schema:
+
+```yaml
+ext_1:
+  anyOf: [ {type: object, properties: {module_type, module_id}}, {type: integer}, {type: string}, {type: 'null'} ]
+```
+
+so an integer is a valid write. The **read** side is not symmetric — the list
+response types the same field as `{module_type, module_id}` only. A
+read-modify-write client, or anything that assumes a round trip, gets an object
+where it wrote a scalar.
+
+Minor on its own, but it interacts with filtering: because the stored column is
+a relation, it is not obvious whether `filter=ext_1 = 123` matches by id or
+needs the `:R(module)` relation syntax, and a malformed filter fails the whole
+request rather than degrading. That is enough to push an integrator to fetch
+wide and filter client-side, which is what this project ended up doing.
+
+**Suggestion:** document (and ideally accept) the scalar form on read, or state
+plainly in the filter reference how a relation column is matched by id.
+
+---
+
+## F28 — `Topics::insert` exposes no `open_flg` parameter, so F22's default cannot be pinned
+
+**Status:** open · **Area:** endpoint settings · **Severity:** medium
+
+F22 established that an API-created row defaults to unpublished and reports
+success anyway. The obvious mitigation is to pin `open_flg: 1` in the endpoint's
+**model_method_params**, so a client cannot forget it. That is not possible:
+`Topics::insert`'s parameter list is `topics_group_id`, `validate_only`,
+`lightweight_mode`, `use_columns`, `upsert_by_columns`, `ext_group`,
+`compare_by_columns`, `unuse_columns`, `require_columns` — no `open_flg`.
+
+So the publish state of API-created content can only ever be set by the caller,
+per request. An operator who wants "everything created through this endpoint is
+published" has no server-side way to express it, and every client must remember
+a flag whose omission fails silently.
+
+**Suggestion:** allow `open_flg` (and ideally `topics_flg`) as a pinnable method
+param on the insert operation. It is the natural fix for F22 and needs no change
+to the default.
+
+---
+
 ## Reporting notes
 
 - F11 and F12 are already filed.
+- F26, F27 and F28 all came out of building the conversation-history feature
+  and belong together in one report about the **content-API integrator
+  experience**: the field key you must send is not the one shown to you (F26),
+  the type you write is not the type you read (F27), and the flag whose default
+  bites you cannot be pinned server-side (F28).
 - F2, F3, F4, F6, F10 are the highest-value cluster: all are
   *diagnosability* problems, and together they account for most of the time lost
   on this project. Worth reporting as a group with the timings from F4.

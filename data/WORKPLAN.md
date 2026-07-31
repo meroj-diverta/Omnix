@@ -76,11 +76,45 @@ Two carried forward:
   from the request body today, which also means a client can deliberately create
   hidden rows. Also confirm `my_own_list` is ticked on `notes/list`.
 
-### Conversation history — frontend done, Kuroco side missing
+### Conversation history — ☑ BUILT 2026-07-31, not yet exercised in a browser
 
-- **O26** — 🔶 **Create the two structures and five endpoints in §C.** The client
-  (`useConversations.ts`) is built, typechecked and committed; nothing works until
-  these exist. This is the first thing to do with admin MCP access.
+Structures **24** (`Omnix: sessions`) and **25** (`Omnix: messages`) exist, and the
+five endpoints are live on api 7: **140** `sessions/list`, **141** `sessions/create`,
+**142** `sessions/delete`, **143** `messages/list`, **144** `messages/create` — all
+`GroupAuth [105]`, `open_flg: 1`. Both groups now carry `writer_groups` **and**
+owned-content edit restriction = `omnix_user` (105), and neither is vectorised.
+Group 25 was `content_input_type: 2` ("Custom — no body column") and is now `1`
+(plain textarea), because the turn text lives in `contents`.
+
+Frontend: `ConversationsPane.vue` is the left rail (list, switch, new, delete);
+`useOmnix.openConversation/newConversation` hydrate the chat window from stored
+turns. `yarn generate` passes and both panes prerender. There is no `vue-tsc` in
+this project, so nothing is typechecked.
+
+Three corrections to §C, all learned the hard way — see F26/F27/F28:
+
+- Fields on group 25 have **no slug**, so the wire names are **`ext_1`..`ext_4`**,
+  not the titles and not `ext_col_NN`. The titles are silently ignored on write.
+- `ext_1` (session_id) is a **relation** field: written as an integer, read back
+  as `{module_type, module_id}`.
+- **`open_flg` cannot be pinned** on `sessions/create` / `messages/create` —
+  `Topics::insert` has no such method param. The client sends it in the body.
+
+Carried forward:
+
+- **O30** — 🔶 **Verify end to end in a real browser.** Cookie auth is
+  browser-only (F25/§13.2), so none of this has been exercised against a live
+  session. Sign in, ask two questions, confirm: one session row, two message rows
+  per exchange with increasing `seq`, the rail lists the thread, reload resumes
+  it, and a second member sees none of it.
+- **O31** — `messages/list` fetches up to 200 of the member's own turns and
+  filters by session **client-side**; the endpoint's `filter_request_allow_list`
+  names `ext_1` but no server filter is sent, because matching a relation column
+  by bare id is unverified and a bad filter fails the whole request. A member
+  with >200 turns in total loses the oldest. Fix by changing `session_id` to a
+  plain number field in the admin UI, then turning the server filter on.
+- **O32** — Deleting a session leaves its message rows orphaned (append-only
+  structure, no bulk delete). Harmless but they accumulate.
 
 ### Chat / retrieval config
 
@@ -167,9 +201,20 @@ Two carried forward:
 
 - **O20** — `isChecking` is shared between the session check and every auth call,
   so the sign-in button reads "Signing in…" on first load.
-- **O21** — After the full-bleed layout change, the header title and footer centre
-  on the window, so with the codex pane open they no longer sit above the centre
-  of the chat column.
+- **O21** — ☑ Resolved 2026-07-31 by the conversation-rail layout change. The
+  header and disclaimer moved out of `layouts/default.vue` and into the chat
+  column itself, so they centre on the chat column rather than the window — and
+  the side rails run the full viewport height instead of being clipped top and
+  bottom by a full-width band. `/register` keeps the default layout.
+
+  The workspace uses **`definePageMeta({ layout: false })`** and sets its own
+  `height: 100dvh`. A dedicated `layouts/chat.vue` was tried first and removed:
+  taking the page's height from a layout's scoped `.shell` meant that when that
+  CSS was not live — a stale `nuxt dev` did exactly this, while the production
+  build was fine — the grid had nothing to size against, collapsed to content
+  height, and left the bottom ~40% of the window black. A page that owns the
+  viewport cannot fail that way. Worth remembering before reintroducing a layout
+  here.
 
 ### Reported / filed already
 
