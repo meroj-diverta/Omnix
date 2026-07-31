@@ -21,18 +21,19 @@
     </div>
 
     <!--
-      Agent mode keeps a server-side thread, so it needs controls the stateless
-      modes don't: which session you're in, and a way to abandon it and start
-      over. Shown only here, because a session id means nothing in the others.
+      Conversation controls. Only shown to a signed-in member, because history
+      lives in member-owned content — anonymous chat still works, statelessly.
     -->
-    <div v-if="mode === 'agent'" class="session-bar">
-      <span v-if="agent.sessionId.value" class="session-id">
-        Session #{{ agent.sessionId.value }}
-        <span class="warn" title="Kuroco does not check who owns a session id (see useAgent.ts)">· unscoped</span>
-      </span>
-      <span v-else class="session-id muted">No session yet — starts on your first message</span>
-      <button type="button" class="ghost" :disabled="agent.isBusy.value" @click="newSession">
-        {{ agent.sessionId.value ? 'New session' : 'Start session' }}
+    <div v-if="isSignedIn" class="session-bar">
+      <select v-if="conversation.sessions.value.length" v-model="picked" class="picker" @change="switchTo">
+        <option :value="0">New conversation</option>
+        <option v-for="s in conversation.sessions.value" :key="s.id" :value="s.id">
+          {{ s.title }}
+        </option>
+      </select>
+      <span v-else class="session-id muted">First question starts a conversation</span>
+      <button v-if="conversation.currentId.value" type="button" class="ghost" @click="conversation.clearCurrent()">
+        New conversation
       </button>
     </div>
 
@@ -58,15 +59,34 @@ import type { ChatMode, ChatModeInfo } from '~/types/chat'
 const props = defineProps<{ isLoading: boolean; mode: ChatMode; modes: ChatModeInfo[] }>()
 const emit = defineEmits<{ ask: [query: string]; 'update:mode': [mode: ChatMode] }>()
 
-const agent = useAgent()
+const conversation = useConversations()
+const { isSignedIn } = useAuth()
 const draft = ref('')
+const picked = ref(0)
 
-// Sessions outlive a reload, so pick up any existing one on mount.
-onMounted(agent.restore)
+// A conversation outlives a reload, so resume it and load its turns.
+onMounted(async () => {
+  conversation.restore()
+  if (!isSignedIn.value) return
+  await conversation.listSessions()
+  if (conversation.currentId.value) {
+    picked.value = conversation.currentId.value
+    await conversation.loadMessages(conversation.currentId.value)
+  }
+})
 
-async function newSession() {
-  agent.endSession()
-  await agent.startSession()
+// Signing in later should populate the picker too.
+watch(isSignedIn, async (signedIn) => {
+  if (signedIn) await conversation.listSessions()
+})
+
+async function switchTo() {
+  if (!picked.value) {
+    conversation.clearCurrent()
+    return
+  }
+  conversation.currentId.value = picked.value
+  await conversation.loadMessages(picked.value)
 }
 
 function submit() {
@@ -122,9 +142,16 @@ function submit() {
   opacity: 0.75;
 }
 
-/* Not decoration: the id is guessable and Kuroco does not check ownership. */
-.warn {
-  color: var(--color-gold);
+.picker {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-void-3);
+  border: 1px solid var(--color-border);
+  border-radius: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: 0.72rem;
 }
 
 .session-bar .ghost {

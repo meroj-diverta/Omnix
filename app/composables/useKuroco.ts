@@ -69,8 +69,19 @@ export const KUROCO_ROUTES = {
   emailValidate: '10/auth/invite',
   register: '10/auth/register',
 
-  // AI Agent sessions — the only tier with conversation history. Both need
-  // creating on api 7; see useAgent.ts for the security caveat.
+  // Conversation history, held in our own content structures rather than in
+  // Kuroco AI Agent sessions — see useConversations.ts for why. Messages are
+  // append-only, so there is no update or delete route for them.
+  sessionsList: '7/sessions/list',
+  sessionsCreate: '7/sessions/create',
+  sessionsDelete: '7/sessions/delete',
+  messagesList: '7/messages/list',
+  messagesCreate: '7/messages/create',
+
+  // AI Agent tier. Not wired into the user-facing chat: tool grants live on the
+  // agent rather than per-caller, so prompt injection against an exposed agent
+  // escalates to whatever it can do, and ai_session_id ownership is unenforced.
+  // Kept for internal or experimental use only.
   agentCreateSession: '7/ai/create_session',
   agentSendMessage: '7/ai/send_message',
 

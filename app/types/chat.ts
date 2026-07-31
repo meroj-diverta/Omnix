@@ -15,7 +15,7 @@ export interface ChatSource {
  * features, and putting the four single-shot operations side by side in one
  * chat makes their differences observable instead of theoretical.
  */
-export type ChatMode = 'answer' | 'supplementary' | 'sources' | 'raw' | 'agent'
+export type ChatMode = 'answer' | 'supplementary' | 'sources' | 'raw'
 
 export interface ChatModeInfo {
   key: ChatMode
