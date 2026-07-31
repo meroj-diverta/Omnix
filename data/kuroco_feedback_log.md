@@ -589,6 +589,43 @@ metered AI operations. Naming the two settings so they cannot be read as one
 
 ---
 
+## F24 — Two group gates on the same endpoint, and one of them cannot work on the login path
+
+**Status:** open · **Area:** endpoint settings, auth · **Severity:** medium–high
+
+`Login::token` — the call that exchanges a grant token for a session — can be
+gated by group in two different places:
+
+| Gate | Evaluated against | Usable on `Login::token`? |
+|---|---|---|
+| **API request restriction** (endpoint setting, GroupAuth) | the caller's **existing session** | **No.** The caller is anonymous by definition at this point |
+| **`allowed_group_ids`** (method parameter) | the member identified by the **grant token** | Yes — this is the intended one |
+
+Setting the endpoint's API request restriction to a group therefore locks the key
+inside the room it opens: the gateway refuses the request before the handler runs,
+and login becomes impossible for everyone.
+
+Observed on one site, same endpoint, same member, same credentials:
+
+| Configuration | Result |
+|---|---|
+| restriction None + `allowed_group_ids:[104]` | `403 Member is not in any of the allowed groups` — correct, actionable |
+| restriction GroupAuth(`omnix_user`) | `401 Unauthorized` — no indication that the setting is unusable here |
+
+Both settings are presented in the same admin area and both read as "restrict this
+endpoint to a group", so choosing the wrong one is an easy and entirely silent
+mistake. The 401 gives no hint that the restriction can never be satisfied on this
+operation.
+
+**Suggestion:** for session-issuing operations (`Login::token`,
+`login_challenge`, `login_challenge_mfa`), either disable the API request
+restriction control with an explanatory note, or warn on save — "this operation
+runs before a session exists; use `allowed_group_ids` to restrict by group".
+Naming the parameter and the setting more distinctly would help too; see F2 and
+F23 for the same confusion in other places.
+
+---
+
 ## Reporting notes
 
 - F11 and F12 are already filed.
