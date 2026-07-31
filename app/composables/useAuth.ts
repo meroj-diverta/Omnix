@@ -1,13 +1,16 @@
-import type { KurocoProfile } from '~/types/kuroco'
+import type { KurocoLoginChallenge, KurocoProfile } from '~/types/kuroco'
 import { KurocoError } from '~/types/kuroco'
 
 /**
  * Member session, held by a Kuroco cookie rather than a token in the bundle.
  *
  * The endpoints map to the Login API model (`nfs/lib/modules/login/api/v1/Login.php`):
- *   login   -> Login::login_challenge
+ *   login   -> Login::login_challenge  (returns a grant_token, sets no session)
+ *   token   -> Login::token            (exchanges it for the session)
  *   profile -> Login::profile
  *   logout  -> Login::logout
+ *
+ * Signing in requires **both** login and token. See signIn.
  *
  * The API structure serving these must be in `cookie` security mode with
  * allowCredentials true and this origin listed in its CORS origins.
@@ -161,13 +164,27 @@ export function useAuth() {
     isChecking.value = true
     authError.value = null
     try {
-      // The response is not saved: auth is cookie-based, so the browser stores
-      // the session itself and this call only needs to succeed. refresh() then
-      // fetches the profile and sets the shared state.
-      await request(routes.login, {
+      // Kuroco login is **two calls**, per tutorials/integrate-login: the first
+      // is a challenge that returns a `grant_token` and sets no session, the
+      // second exchanges that token for one. Stopping after the first looks like
+      // success — HTTP 200, a member_id in the body — while leaving the caller
+      // unauthenticated, which is exactly the "signed in but it didn't stick"
+      // symptom this used to report.
+      const challenge = await request<KurocoLoginChallenge>(routes.login, {
         method: 'POST',
         body: { email, password }
       })
+
+      if (!challenge?.grant_token) {
+        authError.value = 'Kuroco accepted the credentials but returned no grant token, so no session could be created.'
+        return false
+      }
+
+      await request(routes.token, {
+        method: 'POST',
+        body: { grant_token: challenge.grant_token }
+      })
+
       await refresh()
       if (!isSignedIn.value) {
         authError.value = 'Signed in, but the session did not stick. This usually means the cookie was blocked — check that the API structure allows credentials and lists this origin.'

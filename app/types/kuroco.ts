@@ -28,6 +28,16 @@ export interface KurocoChatResponse extends KurocoEnvelope {
   list?: KurocoSearchHit[]
 }
 
+/**
+ * Login::login_challenge — the *first* of two login calls. It sets no session;
+ * `grant_token` must be posted to Login::token to get one.
+ */
+export interface KurocoLoginChallenge extends KurocoEnvelope {
+  grant_token?: string
+  member_id?: number
+  info?: { validUntil?: number }
+}
+
 /** Login::profile — the logged-in member. */
 export interface KurocoProfile extends KurocoEnvelope {
   member_id?: number

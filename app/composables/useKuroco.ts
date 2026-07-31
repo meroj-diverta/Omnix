@@ -58,6 +58,9 @@ export const KUROCO_ROUTES = {
   chatPlain: '7/chat',
 
   login: '7/auth/login',
+  // Second half of the login handshake — login returns a grant_token, this
+  // exchanges it for a session. Both calls are required; see useAuth.signIn.
+  token: '7/auth/token',
   logout: '7/auth/logout',
   profile: '7/auth/profile',
 
