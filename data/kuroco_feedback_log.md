@@ -784,16 +784,96 @@ client-supplied query parameter, so a caller can simply pass someone else's
 `member_id`. A per-request filter cannot be an authorisation boundary.
 
 **Workaround, and what Omnix does.** Keep member-owned content out of the shared
-index entirely. Retrieve it through a member-scoped `Topics::list` endpoint
-(`my_own_list` pinned server-side, `vector_search=` for semantic matching — this
-works, and is the one place vectorising a private structure pays off), then pass
-the result to the model as request text. Retrieval stays private; only the
-caller's own rows can ever reach the prompt.
+index entirely, and retrieve it through a member-scoped `Topics::list` endpoint
+(`my_own_list` pinned server-side), then pass the result to the model as request
+text.
+
+An earlier version of this workaround also reached for `vector_search=` on that
+scoped endpoint for semantic matching, on the assumption that `my_own_list` would
+still bound the results. **That assumption is unverified, and this finding is the
+reason to distrust it:** if the vector-search path ignores per-member scoping the
+same way `chat_contents_search` does, then `my_own_list + vector_search` on one
+endpoint is the *same* leak in miniature — a member's query could rank against
+another member's vectors. There is nothing in the docs, and nothing observed, to
+confirm vector search honours `my_own_list`. So Omnix dropped it (2026-08-03):
+notes now touch **no** vector path at all. Note selection for the prompt is plain
+recency over the already-scoped `notes/list` result. Verified in a two-account
+browser test that notes stay private (panel + injected context). The safe design
+rule this leaves: **do not assume any vector/RAG operation respects ownership
+scoping — keep owned content off every embedding path, scoped endpoint included,
+until Kuroco documents otherwise.**
 
 **Suggestion:** honour `my_topics_only_limit_groups` in the vector search path
 when the caller is an authenticated member; failing that, refuse to include a
 group whose ownership restriction is set in a multi-member endpoint, and say so
 at configuration time rather than silently widening access.
+
+---
+
+## F30 — Exposing the AI Agent to members needs guardrails Kuroco does not provide
+
+**Status:** open · **Area:** AI / Agent, API auth · **Severity:** high (security, if shipped naively)
+
+Building a user-facing agent chat (Omnix "Assistant") surfaced that the two
+member-facing agent operations are unsafe to expose as-is:
+
+- **`create_session(ai_agent_id)` takes the agent id from the caller.** Nothing
+  restricts *which* agent a member may open a session against. On a site that has
+  any privileged internal agent (with tools, MCP credentials, a vault), a logged-in
+  member can simply pass that agent's id and drive it. The id is a small integer,
+  so it is guessable. **Containment has to be done by the integrator**, by pinning
+  `ai_agent_id` in the endpoint's fixed params so the client cannot choose — Kuroco
+  offers no per-agent "may this caller use it?" gate. Worth a built-in
+  allow-list, or at least a warning on the endpoint screen.
+
+- **`send_message` does no session-ownership check** (the F15 gap, re-confirmed
+  here in source for the REST path: `handleSendMessage` in `ai_session_view.php`
+  loads the session by `ai_session_id` alone, no `member_id` comparison). A member
+  can post into — and read back — another member's agent thread.
+
+- **The agent complies.** Even fully contained to one pinned agent, that agent
+  does what it is told, destructively included, with whatever tools it holds. The
+  only real answer is an agent configured with **no destructive tools**; there is
+  no request-time "read-only" flag. Omnix's design: one dedicated, tool-less agent,
+  pinned in the endpoint, plus a client that refuses to confirm any `requires_action`
+  tool request rather than auto-allowing it.
+
+**Suggestion:** treat member-exposed agents as a first-class case — an allow-list
+of agent ids per endpoint, enforced session ownership on `send_message`, and a
+per-endpoint "tools disabled" switch — so the safe configuration is reachable
+without the integrator having to reconstruct it from source.
+
+---
+
+## F31 — The agent REST API has no reply and no member-facing read, so a chat has to be reverse-engineered
+
+**Status:** open · **Area:** AI / Agent, API design · **Severity:** medium (DX)
+
+The agent is asynchronous, which is reasonable, but the member-facing surface
+(`AiAgent::create_session`, `AiAgent::send_message`) does not give a client enough
+to hold a conversation:
+
+- **`send_message` never returns the reply.** It dispatches to the harness and
+  returns `"updated"`. The answer arrives later as session *events*
+  (`agent.message`), and the session status reaches `idle` when done. Nothing in
+  the operation's description or response schema says this; the schema documents
+  only `ai_session_id` and `message` in, and a bare 200 out. An integrator
+  discovers the async event model only by reading the admin controller.
+
+- **There is no member-facing read/poll operation.** The event list and status
+  live on the admin controller (`ai_session_view`, exposed to the Admin MCP), but
+  the `AiAgent` API class exposes only create + send. To poll a reply from the
+  browser, Omnix repurposes `send_message` **with an empty `message`** — the
+  controller skips the dispatch on an empty message but still returns the current
+  events + status. That works, but it is a workaround for a missing
+  `get_session` / `get_events` operation, and it rides on an implementation detail
+  (`if (!empty($message))`) that could change.
+
+**Suggestion:** add a member-facing `get_session`/`get_events` operation alongside
+create/send, and document `send_message` as fire-and-then-poll with the event
+types (`agent.message`, `session.status_idle`, `requires_action`) that a client
+must understand. Right now a working chat client cannot be built from the API
+docs alone.
 
 ---
 

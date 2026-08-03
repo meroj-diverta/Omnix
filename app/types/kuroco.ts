@@ -56,8 +56,28 @@ export interface KurocoAgentSession extends KurocoEnvelope {
 }
 
 /**
- * AiAgent::send_message. The reply field is undocumented and has never been seen
- * working here, so every plausible location is optional and readReply() picks.
+ * One entry in an AI Agent session's event stream (Anthropic Agent-SDK shaped).
+ * `agent.message` is the assistant's reply; text is either a flat field or a
+ * list of content blocks. `session.status_idle` with a `requires_action`
+ * stop_reason means the agent is waiting to run a tool.
+ */
+export interface KurocoAgentEvent {
+  type?: string
+  text?: string
+  message?: string
+  content?: Array<{ type?: string; text?: string }>
+  stop_reason?: { type?: string }
+  /** Present on `type: "error"` events, e.g. an invalid Bedrock model id. */
+  error?: { code?: string; message?: string }
+}
+
+/**
+ * AiAgent::send_message / the session-read snapshot.
+ *
+ * send_message does not return the reply synchronously — it returns "updated"
+ * plus a snapshot of the session. The reply arrives asynchronously in `events`
+ * (poll until `session_status` is `idle`). The flat reply/message/text fields
+ * are kept optional for defensiveness but are not the documented path.
  */
 export interface KurocoAgentReply extends KurocoEnvelope {
   reply?: string
@@ -65,7 +85,7 @@ export interface KurocoAgentReply extends KurocoEnvelope {
   text?: string
   content?: string
   data?: { message?: string; reply?: string }
-  events?: unknown[]
+  events?: KurocoAgentEvent[]
   session_status?: string
 }
 

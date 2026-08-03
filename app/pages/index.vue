@@ -23,6 +23,10 @@
           {{ historyOpen ? '‹ Hide conversations' : 'Conversations ›' }}
         </button>
 
+        <NuxtLink to="/assistant" class="pane-toggle assistant-link" title="A stateful AI agent chat (experimental)">
+          Assistant ⚡
+        </NuxtLink>
+
         <button
           class="pane-toggle"
           :aria-expanded="paneOpen"
@@ -159,6 +163,18 @@ onMounted(() => {
 .pane-toggle:hover {
   color: var(--color-parchment);
   border-color: var(--color-gold);
+}
+
+/* The agent chat is a distinct surface, so mark its entry point distinctly. */
+.assistant-link {
+  text-decoration: none;
+  border-color: var(--color-fel);
+  color: var(--color-fel-bright);
+}
+
+.assistant-link:hover {
+  border-color: var(--color-fel-bright);
+  box-shadow: 0 0 10px rgba(158, 230, 106, 0.3);
 }
 
 .disclaimer {

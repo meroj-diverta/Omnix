@@ -55,7 +55,7 @@ Ordered by friction-yield per unit of effort. "Who": admin clicks (user) vs code
 | 6 | **Embedding template + eval** | Change `search_template_vector`, re-run `eval/run_eval.py`, measure the delta | shared | ☐ | Whether template changes are observable in retrieval quality, and how re-embedding is triggered/queued |
 | 7 | **Post-processing pilot on group 12** | 10-row `clean_guide` pilot, CSV upload with lightweight mode OFF + Force run. Spec: `ai_postprocess_group12.md` | user | ☐ | Confirms F14 end to end and prices the full sweep (~3,900 rows) |
 | 8 | **Spider** | Crawl patch notes into a new structure, then fill custom fields via post-processing — the documented workaround for Spider's limitation | user | ☐ | F13 + F14 in combination: the limitation *and* its blocked workaround |
-| 9 | **AI Agent tier** | **Not for user-facing chat** — decided 2026-07-31 (F15 + F16). Keep for internal tasks only; the memory test is still worth running to settle whether Bedrock sessions persist | user | ◐ deferred | Already produced F15/F16. Blocked on a valid Bedrock model id; note `ai_agent_id: 1` is stale |
+| 9 | **AI Agent tier** | **Now user-facing** — decision reversed 2026-08-03 (user wants a separate agent chat despite the danger). Frontend built contained; needs a dedicated tool-less agent. See §B "Agent chat" | shared | ◐ frontend done, backend blocked | Produced F15/F16 + F30/F31. Blocked on a valid-model, zero-tool agent (O15) |
 | 10 | **Autonomous agent + mailbox** | Daily patch-notes summariser triggered by mail or cron | user | ☐ | The mail-triggers-an-agent path, loop guards, and what an unattended failure looks like |
 | 11 | **RAG Quickstart + RAG log** | Use both throughout the above; log UX gaps | user | ☐ | Whether the built-in tooling is enough to debug retrieval without curl — this session needed curl constantly |
 
@@ -109,11 +109,10 @@ Three corrections to §C, all learned the hard way — see F26/F27/F28:
 
 Carried forward:
 
-- **O30** — 🔶 **Verify end to end in a real browser.** Cookie auth is
-  browser-only (F25/§13.2), so none of this has been exercised against a live
-  session. Sign in, ask two questions, confirm: one session row, two message rows
-  per exchange with increasing `seq`, the rail lists the thread, reload resumes
-  it, and a second member sees none of it.
+- **O30** — ☑ **Verified in a browser 2026-08-03.** Signed in on two separate
+  accounts, asked questions on each: sessions and messages stored correctly per
+  member, and notes are private to each user (no cross-member leak). Conversation
+  history + notes-in-answer both confirmed live against real cookie sessions.
 - **O31** — `messages/list` fetches up to 200 of the member's own turns and
   filters by session **client-side**; the endpoint's `filter_request_allow_list`
   names `ext_1` but no server filter is sent, because matching a relation column
@@ -123,7 +122,12 @@ Carried forward:
 - **O32** — Deleting a session leaves its message rows orphaned (append-only
   structure, no bulk delete). Harmless but they accumulate.
 
-### Notes in the answer — ☑ BUILT 2026-07-31, unverified in a browser
+### Notes in the answer — ☑ VERIFIED 2026-08-03 (two-account browser test)
+
+**Product decision 2026-08-03: notes are excluded from RAG.** Group 23 is not
+added to any shared chat/RAG retrieval endpoint — the F29 leak path is not shipped.
+Notes stay member-private via the scoped `notes/list` endpoint only.
+
 
 The member's own notes now ride along with each question:
 `useNotes.noteContext()` prepends up to 3 preferences plus up to 2 notes matched
@@ -139,10 +143,12 @@ another's notes. Written up as **F29**. Group 23 is vectorised (`use_openai: 1`)
 but reachable only via the scoped endpoint — verified 2026-07-31 that no chat
 endpoint names it.
 
-- **O33** — 🔴 **Reproduce F29 with two accounts before reporting it.** Add group
-  23 to a *throwaway* chat endpoint, have member A save a distinctive note, ask
-  as member B, and see whether it comes back. Source review says it will; the
-  claim should not be filed on source reading alone. Delete the endpoint after.
+- **O33** — 🔶 **Decoupled from the product 2026-08-03** (notes excluded from RAG,
+  above), but F29 remains a valid *Kuroco* finding: RAG applies no per-member
+  scoping, so member-owned content in a shared index leaks. If we still report it,
+  reproduce on a *throwaway* endpoint (group 23 → chat endpoint, member A saves a
+  distinctive note, ask as member B), then delete the endpoint. Not filed on
+  source reading alone. No longer blocks any Omnix feature.
 - **O34** — Measure what the injected profile does to retrieval. The block is
   embedded along with the question, so it can drag the search off-topic — the
   same hazard that keeps conversation history to questions only. Constants
@@ -152,6 +158,48 @@ endpoint names it.
   no way to pass persona or per-member context *out of band* — anything
   personal must go into the same string that gets embedded. Worth raising
   alongside P1's persona item.
+
+### Agent chat — ◐ FRONTEND BUILT 2026-08-03, backend blocked on a safe agent
+
+A **separate** chat surface from the RAG guide (decision reversed 2026-08-03 — the
+user wants it despite the F15/F16 danger). It talks to a stateful Kuroco AI Agent
+session, so it has real server-side memory — unlike the stateless RAG chat that
+needs the 24/25 history bolt-on. The agent session (`ai_session_id`) is NOT the
+same as the 24/25 "session"/"message" rows.
+
+Frontend (all built, `yarn generate` passes, inert until the backend exists):
+- `composables/useAgent.ts` — async protocol: `create_session` once → `send_message`
+  → poll session events until `session_status: idle` → read `agent.message` text.
+  Poll uses `send_message` with an **empty message** (the controller skips the
+  dispatch but returns fresh events+status) — see F31. Refuses to confirm any
+  `requires_action` tool request; surfaces it as blocked instead.
+- `pages/assistant.vue` — the separate chat page (`layout: false`, own viewport),
+  reuses `ChatWindow`/`ChatBubble`, own minimal composer, prominent "experimental
+  agent" warning, per-member `localStorage` session, "New session" reset.
+- `pages/index.vue` — "Assistant ⚡" link in the control strip.
+
+Security design (the containment is server-side; client guards are theater — F30):
+1. **Pin `ai_agent_id`** in the `create_session` endpoint's fixed params — never
+   caller-supplied, or a member could open a session against any agent.
+2. **The pinned agent must have zero destructive tools** (ideally zero tools) —
+   admin-UI config, the only real answer to "the agent just complies".
+3. Session-ownership on `send_message` is unenforced (F15) — accepted only because
+   this is a test site.
+
+Status / open:
+- **O37** — ☑ **Done 2026-08-03.** Both endpoints created on api 7 via MCP, agent
+  pinned: **147** `ai/create_session` (`model_method_params {"ai_agent_id": 3}`,
+  GroupAuth [105]) and **148** `ai/send_message` (GroupAuth [105]). Wired end to end.
+- **O36** — 🔴 **Still blocked: agent 3's model is invalid.** User gave
+  `ai_agent_id: 3`. Reading its sessions (via `ai_session_view-get`) shows every
+  turn dies with the Bedrock error `(ValidationException) ConverseStream: The
+  provided model identifier is invalid` (O15, reproduced exactly). The chat is now
+  fully wired but will only return that error until the model is fixed in the admin
+  UI. Also unconfirmed: whether agent 3 has zero tools (the containment). User must
+  fix the model AND confirm no tools.
+- **O38** — Verify the empty-message poll (F31) returns events+status through the
+  live api-7 endpoint (works via `ai_session_view-get`; not yet exercised through
+  148). Browser test once the model is valid.
 
 ### Chat / retrieval config
 

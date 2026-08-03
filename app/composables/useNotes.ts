@@ -113,53 +113,28 @@ export function useNotes() {
   }
 
   /**
-   * The member's own notes most semantically related to a question.
-   *
-   * Group 23 is vectorised, so `vector_search` on Topics::list does embedding
-   * search over it — and because it goes through `notes/list`, whose
-   * `my_own_list` is pinned server-side, it can only ever match rows the caller
-   * owns. That is the whole reason this does not go through
-   * `chat_contents_search`: see noteContext() below.
-   *
-   * Returns nothing on failure. Personalisation is a nicety; it must never stop
-   * a question being answered.
-   */
-  async function searchNotes(query: string, cnt = RELEVANT_NOTES): Promise<Note[]> {
-    if (!isSignedIn.value || !query.trim()) return []
-    try {
-      const res = await request<KurocoTopicsList>(routes.notesList, {
-        method: 'GET',
-        query: { cnt, vector_search: query }
-      })
-      const rows = res.list ?? res.topics_list ?? []
-      assertOwnership(rows)
-      return rows.map(toNote)
-    } catch {
-      return []
-    }
-  }
-
-  /**
    * A compact "what Omnix knows about this player" block to prepend to a
    * question, or '' when there is nothing worth saying.
    *
-   * Why this is composed client-side instead of just adding group 23 to the
-   * chat endpoint's `topics_group_id`, which would be one config change:
-   * `OpenAI::chat_contents_search` applies no member filter — there is no
-   * `member_id` or `secure_level` anywhere in its query path — so notes in the
-   * shared index would be retrievable by *any* member asking a related
-   * question. One person's notes surfacing in someone else's chat is a data
-   * leak, not a personalisation feature. Fetching them through a member-scoped
-   * endpoint and passing them as text keeps retrieval private.
+   * No RAG. Notes deliberately touch no vector/embedding path (decided
+   * 2026-08-03). Two reasons converge on the same rule:
+   *   1. Adding group 23 to the chat endpoint's `topics_group_id` leaks —
+   *      `OpenAI::chat_contents_search` applies no member filter, so notes in
+   *      the shared index would surface in *any* member's chat (F29).
+   *   2. Even the member-scoped path — `vector_search` on `notes/list` — is not
+   *      trusted to honour `my_own_list`. Whether Kuroco's vector search
+   *      respects per-member scoping at all is unverified, and F29 says the RAG
+   *      layer ignores scoping. So we do not rely on it.
    *
-   * Preferences come first and always: they are short, stable, and the thing
-   * that actually shapes an answer ("I play position 5 support"). Relevant
-   * notes are added per question. Both are capped, because this text is also
-   * what gets embedded for the content search — too much of it drags retrieval
-   * away from the question, the same reason only questions are replayed as
-   * conversation history.
+   * Instead: preferences (short, stable, the thing that actually shapes an
+   * answer — "I play position 5 support") plus the most recent notes, selected
+   * by recency from the already member-scoped `notes/list` result. Plain string,
+   * capped, since it is prepended to the question the chat endpoint then embeds.
+   *
+   * Returns '' on any absence. Personalisation is a nicety; it must never stop
+   * a question being answered.
    */
-  async function noteContext(question: string): Promise<string> {
+  async function noteContext(_question: string): Promise<string> {
     if (!isSignedIn.value) return ''
 
     const prefs = myPreferences.value
@@ -167,12 +142,13 @@ export function useNotes() {
       .map((n) => oneLine(n))
       .filter(Boolean)
 
-    const related = (await searchNotes(question))
-      .filter((n) => n.kind !== 'preference')
+    // Recency, not relevance — myNotes is sorted newest-first by load().
+    const recent = myNotes.value
+      .slice(0, RELEVANT_NOTES)
       .map((n) => oneLine(n))
       .filter(Boolean)
 
-    const lines = [...prefs, ...related].slice(0, MAX_PREFERENCES + RELEVANT_NOTES)
+    const lines = [...prefs, ...recent].slice(0, MAX_PREFERENCES + RELEVANT_NOTES)
     if (!lines.length) return ''
 
     return `About this player (their own saved notes):\n${lines.map((l) => `- ${l}`).join('\n')}`
@@ -241,7 +217,7 @@ export function useNotes() {
     notes, myNotes, myPreferences,
     isLoading, isSaving, error, leakWarning,
     load, create, update, remove,
-    searchNotes, noteContext
+    noteContext
   }
 }
 
