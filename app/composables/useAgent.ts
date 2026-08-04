@@ -47,6 +47,15 @@ import { KurocoError } from '~/types/kuroco'
 const POLL_INTERVAL_MS = 1500
 const POLL_MAX_ATTEMPTS = 40
 
+/**
+ * The agent's Bedrock harness provisions asynchronously. Right after the agent
+ * is created or its model is changed it sits in CREATING/UPDATING and rejects
+ * sends with "Harness is not in an invokable state: CREATING". That clears on
+ * its own, so retry a few times before telling the user it is warming up.
+ */
+const SEND_WARMUP_ATTEMPTS = 3
+const WARMUP_RETRY_MS = 4000
+
 export function useAgent() {
   const { request, routes, decodeEntities } = useKuroco()
   const { member, isSignedIn } = useAuth()
@@ -127,14 +136,39 @@ export function useAgent() {
       const id = await ensureSession()
 
       // Snapshot the event count before sending, so we can tell the agent's
-      // answer to THIS turn from the whole transcript.
-      const before = await pollOnce(id)
+      // answer to THIS turn from the whole transcript. Tolerant of a warming
+      // harness: if the read itself is rejected we simply start from zero.
+      let before: KurocoAgentReply = { events: [], session_status: '' }
+      try {
+        before = await pollOnce(id)
+      } catch (e) {
+        if (!isHarnessWarming(e)) throw e
+      }
       const baseline = (before.events ?? []).length
 
-      await request<KurocoAgentReply>(routes.agentSendMessage, {
-        method: 'POST',
-        body: { ai_session_id: id, message: trimmed }
-      })
+      // Send, retrying while the harness is still coming online.
+      let sent = false
+      for (let attempt = 0; attempt < SEND_WARMUP_ATTEMPTS; attempt++) {
+        try {
+          await request<KurocoAgentReply>(routes.agentSendMessage, {
+            method: 'POST',
+            body: { ai_session_id: id, message: trimmed }
+          })
+          sent = true
+          break
+        } catch (e) {
+          if (!isHarnessWarming(e)) throw e
+          if (attempt < SEND_WARMUP_ATTEMPTS - 1) await sleep(WARMUP_RETRY_MS)
+        }
+      }
+      if (!sent) {
+        pushMessage({
+          role: 'omnix',
+          text: 'The assistant is still warming up — its model was just set, so the agent takes a minute to come online. Give it a moment and try again.',
+          isError: true
+        })
+        return
+      }
 
       let last: KurocoAgentReply = before
       for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
@@ -175,7 +209,10 @@ export function useAgent() {
 
       pushMessage({ role: 'omnix', text: reply })
     } catch (e) {
-      pushMessage({ role: 'omnix', text: explain(e), isError: true })
+      const text = isHarnessWarming(e)
+        ? 'The assistant is still warming up — its model was just set, so the agent takes a minute to come online. Give it a moment and try again.'
+        : explain(e)
+      pushMessage({ role: 'omnix', text, isError: true })
     } finally {
       isLoading.value = false
     }
@@ -237,6 +274,17 @@ function requiresAction(events: KurocoAgentEvent[]): boolean {
       (e.type === 'session.status_idle' || e.type === 'session.thread_status_idle') &&
       e.stop_reason?.type === 'requires_action'
   )
+}
+
+/**
+ * The transient "the agent's backend is still provisioning" error. Kuroco
+ * raises a ValidationException reading "Harness is not in an invokable state:
+ * CREATING" (or UPDATING) while the Bedrock harness comes online after the
+ * agent is created or its model changes; it clears on its own.
+ */
+function isHarnessWarming(e: unknown): boolean {
+  const msg = e instanceof KurocoError ? e.message : e instanceof Error ? e.message : String(e)
+  return /invokable state|\bCREATING\b|\bUPDATING\b/i.test(msg)
 }
 
 function sleep(ms: number): Promise<void> {
